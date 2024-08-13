@@ -1,0 +1,9 @@
+﻿@VoiceFlex_HostAddress = https://localhost:7164
+
+GET {{VoiceFlex_HostAddress}}/api/phonenumbers
+
+###
+
+GET {{VoiceFlex_HostAddress}}/api
+
+###

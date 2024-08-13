@@ -5,6 +5,8 @@ VisualStudioVersion = 17.10.35122.118
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VoiceFlex", "VoiceFlex\VoiceFlex.csproj", "{80482FBE-1D22-4D59-A39E-6CD397121577}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VoiceFlex.Tests", "VoiceFlex.Tests\VoiceFlex.Tests.csproj", "{BC037902-DEFE-4B6F-B3A1-4651E4C2FB9C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{80482FBE-1D22-4D59-A39E-6CD397121577}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{80482FBE-1D22-4D59-A39E-6CD397121577}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{80482FBE-1D22-4D59-A39E-6CD397121577}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC037902-DEFE-4B6F-B3A1-4651E4C2FB9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC037902-DEFE-4B6F-B3A1-4651E4C2FB9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC037902-DEFE-4B6F-B3A1-4651E4C2FB9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC037902-DEFE-4B6F-B3A1-4651E4C2FB9C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
