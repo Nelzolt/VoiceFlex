@@ -1,4 +1,5 @@
-﻿using VoiceFlex.Models;
+﻿using VoiceFlex.DAL;
+using VoiceFlex.Models;
 
 namespace VoiceFlex.BLL;
 
@@ -9,17 +10,11 @@ public interface IPhoneNumberManager
 
 public class PhoneNumberManager : IPhoneNumberManager
 {
-    //private readonly IVoiceFlexService _voiceFlexService;
+    private readonly IPhoneNumberAccessor _phoneNumberAccessor;
 
-    //public PhoneNumberManager(IVoiceFlexService voiceFlexService) => _voiceFlexService = voiceFlexService;
-    public PhoneNumberManager() { }
+    public PhoneNumberManager(IPhoneNumberAccessor phoneNumberAccessor)
+        => _phoneNumberAccessor = phoneNumberAccessor;
 
     public async Task<List<PhoneNumber>> ListPhoneNumbersAsync()
-    {
-        return await Task.FromResult(new List<PhoneNumber>
-        {
-            new() { Id = new Guid(), Number = "123-456-7890" },
-            new() { Id = new Guid(), Number = "098-765-4321" }
-        });
-    }
+        => await _phoneNumberAccessor.ListAsync();
 }

@@ -1,4 +1,5 @@
-﻿using VoiceFlex.BLL;
+﻿using System.Reflection;
+using VoiceFlex.BLL;
 using VoiceFlex.DTO;
 using VoiceFlex.Models;
 
@@ -15,7 +16,7 @@ public static class ApiEndpoints
     }
 
     private static ServiceAlive ServiceAlive()
-        => new() { Version = "1.0.0" };
+        => new() { Version = Assembly.GetEntryAssembly().GetName().Version.ToString() };
 
     private static async Task<List<PhoneNumber>> ListPhoneNumbersAsync(IPhoneNumberManager phoneNumberManager)
         => await phoneNumberManager.ListPhoneNumbersAsync();

@@ -1,34 +1,64 @@
-﻿using VoiceFlex.BLL;
+﻿using Moq;
+using VoiceFlex.BLL;
+using VoiceFlex.DAL;
 using VoiceFlex.Models;
 
-namespace VoiceFlex.Tests.BLL
+namespace VoiceFlex.Tests.BLL;
+
+public class PhoneNumberManagerTests
 {
-    public class PhoneNumberManagerTests
+    private Mock<IPhoneNumberAccessor> _mockPhoneNumberAccessor;
+    private PhoneNumberManager _phoneNumberManager;
+
+    [SetUp]
+    public void SetUp()
     {
-        private PhoneNumberManager _phoneNumberManager;
+        _mockPhoneNumberAccessor = new Mock<IPhoneNumberAccessor>();
+        _phoneNumberManager = new PhoneNumberManager(_mockPhoneNumberAccessor.Object);
+    }
 
-        [SetUp]
-        public void SetUp()
+    [Test]
+    public async Task ListPhoneNumbersAsync_ShouldReturnListOfPhoneNumbers()
+    {
+        // Arrange
+        var expectedPhoneNumbers = new List<PhoneNumber>
         {
-            _phoneNumberManager = new PhoneNumberManager();
-        }
+            new() { Number = "1234567890" },
+            new() { Number = "0987654321" }
+        };
 
-        [Test]
-        public async Task ListPhoneNumbersAsync_ShouldReturnListOfPhoneNumbers()
+        _mockPhoneNumberAccessor
+            .Setup(accessor => accessor.ListAsync())
+            .ReturnsAsync(expectedPhoneNumbers);
+
+        // Act
+        var actualPhoneNumbers = await _phoneNumberManager.ListPhoneNumbersAsync();
+
+        // Assert
+        _mockPhoneNumberAccessor.Verify(accessor => accessor.ListAsync(), Times.Once);
+        Assert.That(actualPhoneNumbers, Has.Count.EqualTo(expectedPhoneNumbers.Count));
+        Assert.Multiple(() =>
         {
-            // Arrange (optional, not needed in this simple test)
+            Assert.That(actualPhoneNumbers[0].Number, Is.EqualTo(expectedPhoneNumbers[0].Number));
+            Assert.That(actualPhoneNumbers[1].Number, Is.EqualTo(expectedPhoneNumbers[1].Number));
+        });
+    }
 
-            // Act
-            var result = await _phoneNumberManager.ListPhoneNumbersAsync();
+    [Test]
+    public async Task ListPhoneNumbersAsync_ShouldWorkWithEmptyList()
+    {
+        // Arrange
+        var expectedPhoneNumbers = new List<PhoneNumber>();
 
-            // Assert
-            Assert.NotNull(result, "The result should not be null");
-            Assert.IsInstanceOf<List<PhoneNumber>>(result, "The result should be of type List<PhoneNumber>");
-            Assert.AreEqual(2, result.Count, "The list should contain two phone numbers");
+        _mockPhoneNumberAccessor
+            .Setup(accessor => accessor.ListAsync())
+            .ReturnsAsync(expectedPhoneNumbers);
 
-            // You might want to check the content of the phone numbers
-            Assert.AreEqual("123-456-7890", result[0].Number, "The first phone number is incorrect");
-            Assert.AreEqual("098-765-4321", result[1].Number, "The second phone number is incorrect");
-        }
+        // Act
+        var actualPhoneNumbers = await _phoneNumberManager.ListPhoneNumbersAsync();
+
+        // Assert
+        _mockPhoneNumberAccessor.Verify(accessor => accessor.ListAsync(), Times.Once);
+        Assert.That(actualPhoneNumbers, Has.Count.EqualTo(0));
     }
 }

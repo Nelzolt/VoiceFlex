@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using VoiceFlex;
 using VoiceFlex.BLL;
+using VoiceFlex.DAL;
 using VoiceFlex.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +14,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 #region BLL Managers
 
 builder.Services.AddScoped<IPhoneNumberManager, PhoneNumberManager>();
+
+#endregion
+#region DataAccessors
+
+builder.Services.AddScoped<IPhoneNumberAccessor, PhoneNumberAccessor>();
 
 #endregion
 
