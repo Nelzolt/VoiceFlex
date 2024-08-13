@@ -1,34 +1,56 @@
-﻿//using VoiceFlex.BLL;
-//using VoiceFlex.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using VoiceFlex.DAL;
+using VoiceFlex.Data;
+using VoiceFlex.Models;
 
-//namespace VoiceFlex.Tests.DAL
-//{
-//    public class PhoneNumberAccessorTests
-//    {
-//        private PhoneNumberManager _phoneNumberManager;
+namespace VoiceFlex.Tests.DAL;
 
-//        [SetUp]
-//        public void SetUp()
-//        {
-//            _phoneNumberManager = new PhoneNumberManager();
-//        }
+public class PhoneNumberAccessorTests
+{
+    private ApplicationDbContext _dbContext;
+    private PhoneNumberAccessor _phoneNumberAccessor;
+    private List<PhoneNumber> _expectedPhoneNumbers;
 
-//        [Test]
-//        public async Task ListPhoneNumbersAsync_ShouldReturnListOfPhoneNumbers()
-//        {
-//            // Arrange (optional, not needed in this simple test)
+    [SetUp]
+    public void SetUp()
+    {
+        _expectedPhoneNumbers = new List<PhoneNumber>
+        {
+            new() { Id = Guid.NewGuid(), Number = "1234567890", AccountId = null },
+            new() { Id = Guid.NewGuid(), Number = "0987654321", AccountId = Guid.NewGuid() }
+        };
 
-//            // Act
-//            var result = await _phoneNumberManager.ListPhoneNumbersAsync();
+        _dbContext = new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase(databaseName: "TestDatabase").Options);
+        _dbContext.VOICEFLEX_PhoneNumbers.AddRange(_expectedPhoneNumbers);
+        _dbContext.SaveChanges();
 
-//            // Assert
-//            Assert.NotNull(result, "The result should not be null");
-//            Assert.IsInstanceOf<List<PhoneNumber>>(result, "The result should be of type List<PhoneNumber>");
-//            Assert.AreEqual(2, result.Count, "The list should contain two phone numbers");
+        _phoneNumberAccessor = new PhoneNumberAccessor(_dbContext);
+    }
 
-//            // You might want to check the content of the phone numbers
-//            Assert.AreEqual("123-456-7890", result[0].Number, "The first phone number is incorrect");
-//            Assert.AreEqual("098-765-4321", result[1].Number, "The second phone number is incorrect");
-//        }
-//    }
-//}
+    [Test]
+    public async Task ListAsync_ShouldReturnPhoneNumberDtoList()
+    {
+        // Act
+        var actualPhoneNumbers = await _phoneNumberAccessor.ListAsync();
+
+        // Assert
+        Assert.That(actualPhoneNumbers, Has.Count.EqualTo(_expectedPhoneNumbers.Count));
+        Assert.Multiple(() =>
+        {
+            Assert.That(actualPhoneNumbers[0].Id, Is.EqualTo(_expectedPhoneNumbers[1].Id));
+            Assert.That(actualPhoneNumbers[0].Number, Is.EqualTo(_expectedPhoneNumbers[1].Number));
+            Assert.That(actualPhoneNumbers[0].AccountId, Is.EqualTo(_expectedPhoneNumbers[1].AccountId));
+            Assert.That(actualPhoneNumbers[1].Id, Is.EqualTo(_expectedPhoneNumbers[0].Id));
+            Assert.That(actualPhoneNumbers[1].Number, Is.EqualTo(_expectedPhoneNumbers[0].Number));
+            Assert.That(actualPhoneNumbers[1].AccountId, Is.EqualTo(_expectedPhoneNumbers[0].AccountId));
+        });
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        _dbContext.Database.EnsureDeleted();
+        _dbContext.Dispose();
+    }
+}

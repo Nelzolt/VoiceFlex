@@ -21,33 +21,6 @@ public class PhoneNumberManagerTests
     public async Task ListPhoneNumbersAsync_ShouldReturnListOfPhoneNumbers()
     {
         // Arrange
-        var expectedPhoneNumbers = new List<PhoneNumberDto>
-        {
-            new(Guid.NewGuid(), "1234567890"),
-            new(Guid.NewGuid(), "0987654321")
-        };
-
-        _mockPhoneNumberAccessor
-            .Setup(accessor => accessor.ListAsync())
-            .ReturnsAsync(expectedPhoneNumbers);
-
-        // Act
-        var actualPhoneNumbers = await _phoneNumberManager.ListPhoneNumbersAsync();
-
-        // Assert
-        _mockPhoneNumberAccessor.Verify(accessor => accessor.ListAsync(), Times.Once);
-        Assert.That(actualPhoneNumbers, Has.Count.EqualTo(expectedPhoneNumbers.Count));
-        Assert.Multiple(() =>
-        {
-            Assert.That(actualPhoneNumbers[0].Number, Is.EqualTo(expectedPhoneNumbers[0].Number));
-            Assert.That(actualPhoneNumbers[1].Number, Is.EqualTo(expectedPhoneNumbers[1].Number));
-        });
-    }
-
-    [Test]
-    public async Task ListPhoneNumbersAsync_ShouldWorkWithEmptyList()
-    {
-        // Arrange
         var expectedPhoneNumbers = new List<PhoneNumberDto>();
 
         _mockPhoneNumberAccessor
@@ -59,6 +32,6 @@ public class PhoneNumberManagerTests
 
         // Assert
         _mockPhoneNumberAccessor.Verify(accessor => accessor.ListAsync(), Times.Once);
-        Assert.That(actualPhoneNumbers, Has.Count.EqualTo(0));
+        Assert.That(actualPhoneNumbers, Is.EqualTo(expectedPhoneNumbers));
     }
 }

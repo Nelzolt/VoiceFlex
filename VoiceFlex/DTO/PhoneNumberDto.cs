@@ -12,6 +12,6 @@ public class PhoneNumberDto
 
     public Account Account { get; set; }
 
-    public PhoneNumberDto(Guid id, string number)
-        => (Id, Number) = (id, number);
+    public PhoneNumberDto(Guid id, string number, Guid? accountId)
+        => (Id, Number, AccountId) = (id, number, accountId);
 }
