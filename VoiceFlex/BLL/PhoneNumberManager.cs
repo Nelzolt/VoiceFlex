@@ -1,11 +1,11 @@
 ﻿using VoiceFlex.DAL;
-using VoiceFlex.Models;
+using VoiceFlex.DTO;
 
 namespace VoiceFlex.BLL;
 
 public interface IPhoneNumberManager
 {
-    Task<List<PhoneNumber>> ListPhoneNumbersAsync();
+    Task<List<PhoneNumberDto>> ListPhoneNumbersAsync();
 }
 
 public class PhoneNumberManager : IPhoneNumberManager
@@ -15,6 +15,6 @@ public class PhoneNumberManager : IPhoneNumberManager
     public PhoneNumberManager(IPhoneNumberAccessor phoneNumberAccessor)
         => _phoneNumberAccessor = phoneNumberAccessor;
 
-    public async Task<List<PhoneNumber>> ListPhoneNumbersAsync()
+    public async Task<List<PhoneNumberDto>> ListPhoneNumbersAsync()
         => await _phoneNumberAccessor.ListAsync();
 }

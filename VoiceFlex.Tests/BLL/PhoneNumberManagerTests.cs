@@ -1,7 +1,7 @@
 ﻿using Moq;
 using VoiceFlex.BLL;
 using VoiceFlex.DAL;
-using VoiceFlex.Models;
+using VoiceFlex.DTO;
 
 namespace VoiceFlex.Tests.BLL;
 
@@ -21,10 +21,10 @@ public class PhoneNumberManagerTests
     public async Task ListPhoneNumbersAsync_ShouldReturnListOfPhoneNumbers()
     {
         // Arrange
-        var expectedPhoneNumbers = new List<PhoneNumber>
+        var expectedPhoneNumbers = new List<PhoneNumberDto>
         {
-            new() { Number = "1234567890" },
-            new() { Number = "0987654321" }
+            new(Guid.NewGuid(), "1234567890"),
+            new(Guid.NewGuid(), "0987654321")
         };
 
         _mockPhoneNumberAccessor
@@ -48,7 +48,7 @@ public class PhoneNumberManagerTests
     public async Task ListPhoneNumbersAsync_ShouldWorkWithEmptyList()
     {
         // Arrange
-        var expectedPhoneNumbers = new List<PhoneNumber>();
+        var expectedPhoneNumbers = new List<PhoneNumberDto>();
 
         _mockPhoneNumberAccessor
             .Setup(accessor => accessor.ListAsync())

@@ -1,11 +1,12 @@
-﻿using VoiceFlex.Data;
-using VoiceFlex.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using VoiceFlex.Data;
+using VoiceFlex.DTO;
 
 namespace VoiceFlex.DAL
 {
     public interface IPhoneNumberAccessor
     {
-        Task<List<PhoneNumber>> ListAsync();
+        Task<List<PhoneNumberDto>> ListAsync();
     }
 
     public class PhoneNumberAccessor : IPhoneNumberAccessor
@@ -13,13 +14,12 @@ namespace VoiceFlex.DAL
         private readonly ApplicationDbContext _dbContext;
 
         public PhoneNumberAccessor(ApplicationDbContext dbContext) => _dbContext = dbContext;
-        public async Task<List<PhoneNumber>> ListAsync()
-        {
-            return await Task.FromResult(new List<PhoneNumber>
-            {
-                new() { Id = new Guid(), Number = "123-456-7890" },
-                new() { Id = new Guid(), Number = "098-765-4321" }
-            });
-        }
+
+        public async Task<List<PhoneNumberDto>> ListAsync()
+            => await _dbContext.VOICEFLEX_PhoneNumbers
+                .AsNoTracking()
+                .OrderBy(c => c.Number)
+                .Select(c => new PhoneNumberDto(c.Id, c.Number))
+                .ToListAsync();
     }
 }
