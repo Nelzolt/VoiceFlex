@@ -32,13 +32,13 @@ public class PhoneNumberApiEndpointsTests
     }
 
     [Test]
-    public async Task CreateAccountAsync_Should_Call_AccountManager_CreateAccountAsync_And_Return_NewAccount()
+    public async Task CreatePhoneNumberAsync_Should_Call_PhoneNumberManager_CreatePhoneNumberAsync_And_Return_NewPhoneNumber()
     {
         // Arrange
         _mockPhoneNumberManager.Setup(m => m.CreatePhoneNumberAsync(It.IsAny<PhoneNumberDto>())).ReturnsAsync(_expectedPhoneNumber);
 
         // Act
-        var response = await _httpClient.PostAsJsonAsync($"/api/phonenumbers", _expectedPhoneNumber);
+        var response = await _httpClient.PostAsJsonAsync("/api/phonenumbers", _expectedPhoneNumber);
         response.EnsureSuccessStatusCode();
 
         var actualPhoneNumber = await response.Content.ReadFromJsonAsync<PhoneNumberDto>();
@@ -48,6 +48,20 @@ public class PhoneNumberApiEndpointsTests
             p => p.Number.Equals(_expectedPhoneNumber.Number))),
             Times.Once);
         Assert.That(actualPhoneNumber.Number, Is.EqualTo(_expectedPhoneNumber.Number));
+    }
+
+    [Test]
+    public async Task DeletePhoneNumberAsync_Should_Call_PhoneNumberManager_DeletePhoneNumberAsync()
+    {
+        // Arrange
+        var phoneNumberId = Guid.NewGuid();
+
+        // Act
+        var response = await _httpClient.DeleteAsync($"/api/phonenumbers/{phoneNumberId}");
+        response.EnsureSuccessStatusCode();
+
+        // Assert
+        _mockPhoneNumberManager.Verify(m => m.DeletePhoneNumberAsync(It.Is<Guid>(p => p.Equals(phoneNumberId))), Times.Once);
     }
 
     [TearDown]
