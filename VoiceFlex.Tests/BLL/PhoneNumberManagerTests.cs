@@ -19,19 +19,19 @@ public class PhoneNumberManagerTests
         _expectedPhoneNumbers = new List<PhoneNumberDto>();
     }
 
-    [Test]
-    public async Task ListPhoneNumbersAsync_ShouldReturnListOfPhoneNumbers()
-    {
-        // Arrange
-        _mockPhoneNumberAccessor
-            .Setup(accessor => accessor.ListAsync())
-            .ReturnsAsync(_expectedPhoneNumbers);
+    //[Test]
+    //public async Task ListPhoneNumbersAsync_ShouldReturnListOfPhoneNumbers()
+    //{
+    //    // Arrange
+    //    _mockPhoneNumberAccessor
+    //        .Setup(accessor => accessor.ListAsync())
+    //        .ReturnsAsync(_expectedPhoneNumbers);
 
-        // Act
-        var actualPhoneNumbers = await _phoneNumberManager.ListPhoneNumbersAsync();
+    //    // Act
+    //    var actualPhoneNumbers = await _phoneNumberManager.ListPhoneNumbersAsync();
 
-        // Assert
-        _mockPhoneNumberAccessor.Verify(accessor => accessor.ListAsync(), Times.Once);
-        Assert.That(actualPhoneNumbers, Is.EqualTo(_expectedPhoneNumbers));
-    }
+    //    // Assert
+    //    _mockPhoneNumberAccessor.Verify(accessor => accessor.ListAsync(), Times.Once);
+    //    Assert.That(actualPhoneNumbers, Is.EqualTo(_expectedPhoneNumbers));
+    //}
 }

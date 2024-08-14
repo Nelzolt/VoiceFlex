@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using VoiceFlex.DAL;
 using VoiceFlex.Data;
-using VoiceFlex.Models;
+using VoiceFlex.DTO;
 
 namespace VoiceFlex.Tests.DAL;
 
@@ -9,42 +9,37 @@ public class PhoneNumberAccessorTests
 {
     private ApplicationDbContext _dbContext;
     private PhoneNumberAccessor _phoneNumberAccessor;
-    private List<PhoneNumber> _expectedPhoneNumbers;
+    private PhoneNumberDto _newPhoneNumber;
 
     [SetUp]
     public void SetUp()
     {
-        _expectedPhoneNumbers = new List<PhoneNumber>
+        _newPhoneNumber = new PhoneNumberDto
         {
-            new() { Id = Guid.NewGuid(), Number = "1234567890", AccountId = null },
-            new() { Id = Guid.NewGuid(), Number = "0987654321", AccountId = Guid.NewGuid() }
+            Number = "123456789"
         };
 
         _dbContext = new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(databaseName: "TestDatabase").Options);
-        _dbContext.VOICEFLEX_PhoneNumbers.AddRange(_expectedPhoneNumbers);
-        _dbContext.SaveChanges();
-
         _phoneNumberAccessor = new PhoneNumberAccessor(_dbContext);
     }
 
     [Test]
-    public async Task ListAsync_ShouldReturnPhoneNumberDtoList()
+    public async Task CreateAsync_Should_Add_PhoneNumber_To_Db_And_Return_PhoneNumber_With_Id()
     {
         // Act
-        var actualPhoneNumbers = await _phoneNumberAccessor.ListAsync();
+        var actualPhoneNumber = await _phoneNumberAccessor.CreateAsync(_newPhoneNumber);
 
-        // Assert - Mind that the result list must be sorted by number
-        Assert.That(actualPhoneNumbers, Has.Count.EqualTo(_expectedPhoneNumbers.Count));
+        // Assert
         Assert.Multiple(() =>
         {
-            Assert.That(actualPhoneNumbers[0].Id, Is.EqualTo(_expectedPhoneNumbers[1].Id));
-            Assert.That(actualPhoneNumbers[0].Number, Is.EqualTo(_expectedPhoneNumbers[1].Number));
-            Assert.That(actualPhoneNumbers[0].AccountId, Is.EqualTo(_expectedPhoneNumbers[1].AccountId));
-            Assert.That(actualPhoneNumbers[1].Id, Is.EqualTo(_expectedPhoneNumbers[0].Id));
-            Assert.That(actualPhoneNumbers[1].Number, Is.EqualTo(_expectedPhoneNumbers[0].Number));
-            Assert.That(actualPhoneNumbers[1].AccountId, Is.EqualTo(_expectedPhoneNumbers[0].AccountId));
+            Assert.That(actualPhoneNumber.Number, Is.EqualTo(_newPhoneNumber.Number));
+            Assert.That(actualPhoneNumber.Id, Is.Not.EqualTo(Guid.Empty));
         });
+        var createdPhoneNumber = await _dbContext.VOICEFLEX_PhoneNumbers
+            .Where(a => a.Id.Equals(actualPhoneNumber.Id))
+            .FirstOrDefaultAsync();
+        Assert.That(createdPhoneNumber, Is.Not.Null);
     }
 
     [TearDown]

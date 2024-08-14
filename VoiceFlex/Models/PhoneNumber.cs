@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using VoiceFlex.DTO;
 
 namespace VoiceFlex.Models
 {
@@ -11,5 +12,10 @@ namespace VoiceFlex.Models
 
         public Guid? AccountId { get; set; }
         public virtual Account Account { get; set; }
+
+        public PhoneNumber() { }
+
+        public PhoneNumber(PhoneNumberDto phoneNumber)
+            => (Id, Number) = (phoneNumber.Id, phoneNumber.Number);
     }
 }
