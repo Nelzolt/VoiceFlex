@@ -24,4 +24,11 @@ public class PhoneNumberAccessor : IPhoneNumberAccessor
         phoneNumber.Id = dbPhoneNumber.Id;
         return phoneNumber;
     }
+
+    public async Task DeleteAsync(Guid id)
+    {
+        var phoneNumber = await _dbContext.VOICEFLEX_PhoneNumbers.FindAsync(id);
+        _dbContext.VOICEFLEX_PhoneNumbers.Remove(phoneNumber);
+        await _dbContext.SaveChangesAsync();
+    }
 }

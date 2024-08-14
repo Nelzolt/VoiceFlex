@@ -2,6 +2,7 @@
 using VoiceFlex.DAL;
 using VoiceFlex.Data;
 using VoiceFlex.DTO;
+using VoiceFlex.Models;
 
 namespace VoiceFlex.Tests.DAL;
 
@@ -10,6 +11,7 @@ public class PhoneNumberAccessorTests
     private ApplicationDbContext _dbContext;
     private PhoneNumberAccessor _phoneNumberAccessor;
     private PhoneNumberDto _newPhoneNumber;
+    private PhoneNumber _phoneNumberToDelete;
 
     [SetUp]
     public void SetUp()
@@ -18,9 +20,16 @@ public class PhoneNumberAccessorTests
         {
             Number = "123456789"
         };
+        _phoneNumberToDelete = new PhoneNumber
+        {
+            Number = "321"
+        };
 
         _dbContext = new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(databaseName: "TestDatabase").Options);
+        _dbContext.VOICEFLEX_PhoneNumbers.Add(_phoneNumberToDelete);
+        _dbContext.SaveChanges();
+
         _phoneNumberAccessor = new PhoneNumberAccessor(_dbContext);
     }
 
@@ -36,10 +45,19 @@ public class PhoneNumberAccessorTests
             Assert.That(actualPhoneNumber.Number, Is.EqualTo(_newPhoneNumber.Number));
             Assert.That(actualPhoneNumber.Id, Is.Not.EqualTo(Guid.Empty));
         });
-        var createdPhoneNumber = await _dbContext.VOICEFLEX_PhoneNumbers
-            .Where(a => a.Id.Equals(actualPhoneNumber.Id))
-            .FirstOrDefaultAsync();
+        var createdPhoneNumber = await _dbContext.VOICEFLEX_PhoneNumbers.FindAsync(actualPhoneNumber.Id);
         Assert.That(createdPhoneNumber, Is.Not.Null);
+    }
+
+    [Test]
+    public async Task DeleteAsync_Should_Delete_PhoneNumber_From_Db()
+    {
+        // Act
+        await _phoneNumberAccessor.DeleteAsync(_phoneNumberToDelete.Id);
+
+        // Assert
+        var deletedPhoneNumber = await _dbContext.VOICEFLEX_PhoneNumbers.FindAsync(_phoneNumberToDelete.Id);
+        Assert.That(deletedPhoneNumber, Is.Null);
     }
 
     [TearDown]

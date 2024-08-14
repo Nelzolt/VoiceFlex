@@ -56,9 +56,7 @@ public class AccountAccessorTests
             Assert.That(actualAccount.Status, Is.EqualTo(_newAccount.Status));
             Assert.That(actualAccount.Id, Is.Not.EqualTo(Guid.Empty));
         });
-        var createdAccount = await _dbContext.VOICEFLEX_Accounts
-            .Where(a => a.Id.Equals(actualAccount.Id))
-            .FirstOrDefaultAsync();
+        var createdAccount = await _dbContext.VOICEFLEX_Accounts.FindAsync(actualAccount.Id);
         Assert.That(createdAccount, Is.Not.Null);
     }
 
