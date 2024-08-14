@@ -29,12 +29,37 @@ public class AccountApiEndpointsTests
         _expectedAccount = new AccountDto()
         {
             Id = accountId,
+            Description = "test",
             PhoneNumbers = new List<PhoneNumberDto>
             {
                 new(Guid.NewGuid(), "0987654321", accountId),
                 new(Guid.NewGuid(), "1234567890", accountId)
             }
         };
+    }
+
+    [Test]
+    public async Task CreateAccountAsync_Should_Call_AccountManager_CreateAccountAsync_And_Return_NewAccount()
+    {
+        // Arrange
+        _mockAccountManager.Setup(m => m.CreateAccountAsync(It.IsAny<AccountDto>())).ReturnsAsync(_expectedAccount);
+
+        // Act
+        var response = await _httpClient.PostAsJsonAsync($"/api/accounts", _expectedAccount);
+        response.EnsureSuccessStatusCode();
+
+        var actualAccount = await response.Content.ReadFromJsonAsync<AccountDto>();
+
+        // Assert
+        _mockAccountManager.Verify(m => m.CreateAccountAsync(It.Is<AccountDto>(
+            p => p.Description.Equals(_expectedAccount.Description)
+            && p.Status.Equals(_expectedAccount.Status))),
+            Times.Once);
+        Assert.Multiple(() =>
+        {
+            Assert.That(actualAccount.Description, Is.EqualTo(_expectedAccount.Description));
+            Assert.That(actualAccount.Status, Is.EqualTo(_expectedAccount.Status));
+        });
     }
 
     [Test]

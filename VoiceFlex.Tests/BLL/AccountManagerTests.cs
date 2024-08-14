@@ -20,6 +20,22 @@ public class AccountManagerTests
     }
 
     [Test]
+    public async Task CreateAccountAsync_Should_Call_AccountAccessor_CreateAsync_And_Return_NewAccount()
+    {
+        // Arrange
+        _mockAccountAccessor
+            .Setup(accessor => accessor.CreateAsync(It.IsAny<AccountDto>()))
+            .ReturnsAsync(_expectedAccount);
+
+        // Act
+        var actualAccount = await _accountManager.CreateAccountAsync(_expectedAccount);
+
+        // Assert
+        _mockAccountAccessor.Verify(accessor => accessor.CreateAsync(It.Is<AccountDto>(p => p.Equals(_expectedAccount))), Times.Once);
+        Assert.That(actualAccount, Is.EqualTo(_expectedAccount));
+    }
+
+    [Test]
     public async Task GetAccountWithPhoneNumbersAsync_Should_Call_AccountAccessor_GetAsync_With_Correct_Parameters()
     {
         // Arrange
@@ -33,22 +49,6 @@ public class AccountManagerTests
 
         // Assert
         _mockAccountAccessor.Verify(accessor => accessor.GetAsync(It.Is<Guid>(p => p.Equals(accountId))), Times.Once);
-        Assert.That(actualAccount, Is.EqualTo(_expectedAccount));
-    }
-
-    [Test]
-    public async Task CreateAccountAsync_Should_Call_AccountAccessor_CreateAsync_With_Correct_Parameters()
-    {
-        // Arrange
-        _mockAccountAccessor
-            .Setup(accessor => accessor.CreateAsync(It.IsAny<AccountDto>()))
-            .ReturnsAsync(_expectedAccount);
-
-        // Act
-        var actualAccount = await _accountManager.CreateAccountAsync(_expectedAccount);
-
-        // Assert
-        _mockAccountAccessor.Verify(accessor => accessor.CreateAsync(It.Is<AccountDto>(p => p.Equals(_expectedAccount))), Times.Once);
         Assert.That(actualAccount, Is.EqualTo(_expectedAccount));
     }
 }

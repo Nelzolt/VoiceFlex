@@ -44,6 +44,25 @@ public class AccountAccessorTests
     }
 
     [Test]
+    public async Task CreateAsync_Should_Add_Account_To_Db_And_Return_Account_With_Id()
+    {
+        // Act
+        var actualAccount = await _accountAccessor.CreateAsync(_newAccount);
+
+        // Assert
+        Assert.Multiple(() =>
+        {
+            Assert.That(actualAccount.Description, Is.EqualTo(_newAccount.Description));
+            Assert.That(actualAccount.Status, Is.EqualTo(_newAccount.Status));
+            Assert.That(actualAccount.Id, Is.Not.EqualTo(Guid.Empty));
+        });
+        var createdAccount = await _dbContext.VOICEFLEX_Accounts
+            .Where(a => a.Id.Equals(actualAccount.Id))
+            .FirstOrDefaultAsync();
+        Assert.That(createdAccount, Is.Not.Null);
+    }
+
+    [Test]
     public async Task GetAsync_Should_Return_Account_With_PhoneNumbers()
     {
         // Act
@@ -62,25 +81,6 @@ public class AccountAccessorTests
             Assert.That(actualPhoneNumbers[1].Number, Is.EqualTo(_expectedPhoneNumbers[0].Number));
             Assert.That(actualPhoneNumbers[1].AccountId, Is.EqualTo(_expectedPhoneNumbers[0].AccountId));
         });
-    }
-
-    [Test]
-    public async Task CreateAsync_Should_Add_Account_To_Db_And_Return_Account_With_Id()
-    {
-        // Act
-        var actualAccount = await _accountAccessor.CreateAsync(_newAccount);
-
-        // Assert
-        Assert.Multiple(() =>
-        {
-            Assert.That(actualAccount.Description, Is.EqualTo(_newAccount.Description));
-            Assert.That(actualAccount.Status, Is.EqualTo(_newAccount.Status));
-            Assert.That(actualAccount.Id, Is.Not.EqualTo(Guid.Empty));
-        });
-        var createdAccount = await _dbContext.VOICEFLEX_Accounts
-            .Where(a => a.Id.Equals(actualAccount.Id))
-            .FirstOrDefaultAsync();
-        Assert.That(createdAccount, Is.Not.Null);
     }
 
     [TearDown]

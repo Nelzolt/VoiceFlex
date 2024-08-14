@@ -7,11 +7,11 @@ public static class PhoneNumberApiEndpoints
 {
     public static WebApplication MapPhoneNumberApiEndpoints(this WebApplication app)
     {
-        //app.MapGet("/api/phonenumbers", ListPhoneNumbersAsync);
+        app.MapPost("/api/phonenumbers", CreatePhoneNumberAsync);
 
         return app;
     }
 
-    //private static async Task<List<PhoneNumberDto>> ListPhoneNumbersAsync(IPhoneNumberManager phoneNumberManager)
-    //    => await phoneNumberManager.ListPhoneNumbersAsync();
+    private static async Task<PhoneNumberDto> CreatePhoneNumberAsync(PhoneNumberDto phoneNumber, IPhoneNumberManager phoneNumberManager)
+        => await phoneNumberManager.CreatePhoneNumberAsync(phoneNumber);
 }
