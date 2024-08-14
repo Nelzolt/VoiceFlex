@@ -9,6 +9,7 @@ public interface IAccountAccessor
 {
     Task<AccountDto> CreateAsync(AccountDto account);
     Task<AccountDto> GetAsync(Guid id);
+    Task<Account> UpdateAsync(Guid id, AccountUpdateDto accountUpdate);
 }
 
 public class AccountAccessor : IAccountAccessor
@@ -34,4 +35,12 @@ public class AccountAccessor : IAccountAccessor
             .Include(a => a.PhoneNumbers)
             .Select(a => new AccountDto(a.Id, a.Description, a.Status, a.PhoneNumbers))
             .FirstOrDefaultAsync();
+
+    public async Task<Account> UpdateAsync(Guid id, AccountUpdateDto accountUpdate)
+    {
+        var dbAccount = await _dbContext.VOICEFLEX_Accounts.FindAsync(id);
+        dbAccount.Status = accountUpdate.Status;
+        await _dbContext.SaveChangesAsync();
+        return dbAccount;
+    }
 }

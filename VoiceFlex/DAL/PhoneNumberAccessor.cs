@@ -26,6 +26,14 @@ public class PhoneNumberAccessor : IPhoneNumberAccessor
         return phoneNumber;
     }
 
+    public async Task<PhoneNumber> UpdateAsync(Guid id, PhoneNumberUpdateDto phoneNumberUpdate)
+    {
+        var dbPhoneNumber = await _dbContext.VOICEFLEX_PhoneNumbers.FindAsync(id);
+        dbPhoneNumber.AccountId = phoneNumberUpdate.AccountId;
+        await _dbContext.SaveChangesAsync();
+        return dbPhoneNumber;
+    }
+
     public async Task DeleteAsync(Guid id)
     {
         var phoneNumber = await _dbContext.VOICEFLEX_PhoneNumbers.FindAsync(id);

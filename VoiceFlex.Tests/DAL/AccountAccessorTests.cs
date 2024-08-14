@@ -27,6 +27,7 @@ public class AccountAccessorTests
         _expectedAccount = new Account
         {
             Id = _accountId,
+            Status = AccountStatus.Active,
             PhoneNumbers = _expectedPhoneNumbers
         };
         _newAccount = new AccountDto
@@ -78,6 +79,38 @@ public class AccountAccessorTests
             Assert.That(actualPhoneNumbers[1].Id, Is.EqualTo(_expectedPhoneNumbers[0].Id));
             Assert.That(actualPhoneNumbers[1].Number, Is.EqualTo(_expectedPhoneNumbers[0].Number));
             Assert.That(actualPhoneNumbers[1].AccountId, Is.EqualTo(_expectedPhoneNumbers[0].AccountId));
+        });
+    }
+
+    [Test]
+    public async Task UpdateAsync_Should_Update_Account_In_Db_And_Return_Updated_Account()
+    {
+        // Arrange
+        var accountUpdateDto = new AccountUpdateDto { Status = AccountStatus.Suspended };
+
+        // Act
+        var updatedAccount = await _accountAccessor.UpdateAsync(_expectedAccount.Id, accountUpdateDto);
+
+        // Assert
+        Assert.Multiple(() =>
+        {
+            Assert.That(updatedAccount.Id, Is.EqualTo(_expectedAccount.Id));
+            Assert.That(updatedAccount.Status, Is.EqualTo(accountUpdateDto.Status));
+            Assert.That(updatedAccount.Description, Is.EqualTo(_expectedAccount.Description));
+        });
+
+        // Arrange
+        accountUpdateDto.Status = AccountStatus.Active;
+
+        // Act
+        updatedAccount = await _accountAccessor.UpdateAsync(_expectedAccount.Id, accountUpdateDto);
+
+        // Assert
+        Assert.Multiple(() =>
+        {
+            Assert.That(updatedAccount.Id, Is.EqualTo(_expectedAccount.Id));
+            Assert.That(updatedAccount.Status, Is.EqualTo(accountUpdateDto.Status));
+            Assert.That(updatedAccount.Description, Is.EqualTo(_expectedAccount.Description));
         });
     }
 

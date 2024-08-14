@@ -10,12 +10,25 @@ public class PhoneNumberAccessorTests
 {
     private ApplicationDbContext _dbContext;
     private PhoneNumberAccessor _phoneNumberAccessor;
+    private PhoneNumber _phoneNumber;
     private PhoneNumberDto _newPhoneNumber;
     private PhoneNumber _phoneNumberToDelete;
+    private Guid _accountId;
+    private Account _account;
 
     [SetUp]
     public void SetUp()
     {
+        _accountId = Guid.NewGuid();
+        _account = new Account
+        {
+            Id = _accountId,
+            Status = AccountStatus.Active
+        };
+        _phoneNumber = new PhoneNumber
+        {
+            Number = "0555444"
+        };
         _newPhoneNumber = new PhoneNumberDto
         {
             Number = "123456789"
@@ -27,7 +40,9 @@ public class PhoneNumberAccessorTests
 
         _dbContext = new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(databaseName: "TestDatabase").Options);
+        _dbContext.VOICEFLEX_PhoneNumbers.Add(_phoneNumber);
         _dbContext.VOICEFLEX_PhoneNumbers.Add(_phoneNumberToDelete);
+        _dbContext.VOICEFLEX_Accounts.Add(_account);
         _dbContext.SaveChanges();
 
         _phoneNumberAccessor = new PhoneNumberAccessor(_dbContext);
@@ -47,6 +62,38 @@ public class PhoneNumberAccessorTests
         });
         var createdPhoneNumber = await _dbContext.VOICEFLEX_PhoneNumbers.FindAsync(actualPhoneNumber.Id);
         Assert.That(createdPhoneNumber, Is.Not.Null);
+    }
+
+    [Test]
+    public async Task UpdateAsync_Should_Update_PhoneNumber_In_Db_And_Return_Updated_PhoneNumber()
+    {
+        // Arrange
+        var phoneNumberUpdateDto = new PhoneNumberUpdateDto { AccountId = _accountId };
+
+        // Act
+        var updatedPhoneNumber = await _phoneNumberAccessor.UpdateAsync(_phoneNumber.Id, phoneNumberUpdateDto);
+
+        // Assert
+        Assert.Multiple(() =>
+        {
+            Assert.That(updatedPhoneNumber.Id, Is.EqualTo(_phoneNumber.Id));
+            Assert.That(updatedPhoneNumber.Number, Is.EqualTo(_phoneNumber.Number));
+            Assert.That(updatedPhoneNumber.AccountId, Is.EqualTo(phoneNumberUpdateDto.AccountId));
+        });
+
+        // Arrange
+        phoneNumberUpdateDto.AccountId = null;
+
+        // Act
+        updatedPhoneNumber = await _phoneNumberAccessor.UpdateAsync(_phoneNumber.Id, phoneNumberUpdateDto);
+
+        // Assert
+        Assert.Multiple(() =>
+        {
+            Assert.That(updatedPhoneNumber.Id, Is.EqualTo(_phoneNumber.Id));
+            Assert.That(updatedPhoneNumber.Number, Is.EqualTo(_phoneNumber.Number));
+            Assert.That(updatedPhoneNumber.AccountId, Is.Null);
+        });
     }
 
     [Test]
