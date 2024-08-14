@@ -4,6 +4,7 @@ using Moq;
 using System.Net.Http.Json;
 using VoiceFlex.BLL;
 using VoiceFlex.DTO;
+using VoiceFlex.Models;
 using VoiceFlex.Tests.TestHelpers;
 
 namespace VoiceFlex.Tests.ApiEndpoints;
@@ -15,6 +16,7 @@ public class PhoneNumberApiEndpointsTests
     private HttpClient _httpClient;
     private Mock<IPhoneNumberManager> _mockPhoneNumberManager;
     private PhoneNumberDto _expectedPhoneNumber;
+    private PhoneNumber _phoneNumber;
 
     [SetUp]
     public void SetUp()
@@ -27,7 +29,13 @@ public class PhoneNumberApiEndpointsTests
         _httpClient = _factory.CreateClient();
         _expectedPhoneNumber = new PhoneNumberDto
         {
-             Number = "0987654321"
+            Number = "0987654321"
+        };
+        _phoneNumber = new PhoneNumber
+        {
+            Id = Guid.NewGuid(),
+            Number = "0987654321",
+            AccountId = Guid.NewGuid()
         };
     }
 
@@ -48,6 +56,32 @@ public class PhoneNumberApiEndpointsTests
             p => p.Number.Equals(_expectedPhoneNumber.Number))),
             Times.Once);
         Assert.That(actualPhoneNumber.Number, Is.EqualTo(_expectedPhoneNumber.Number));
+    }
+
+    [Test]
+    public async Task UpdatePhoneNumberAsync_Should_Call_PhoneNumberManager_UpdatePhoneNumberAsync_And_Return_UpdatedPhoneNumber()
+    {
+        // Arrange
+        var phoneNumberUpdateDto = new PhoneNumberUpdateDto();
+        _mockPhoneNumberManager.Setup(m => m.UpdatePhoneNumberAsync(It.IsAny<Guid>(), It.IsAny<PhoneNumberUpdateDto>())).ReturnsAsync(_phoneNumber);
+
+        // Act
+        var response = await _httpClient.PatchAsJsonAsync($"/api/phoneNumbers/{_phoneNumber.Id}", phoneNumberUpdateDto);
+        response.EnsureSuccessStatusCode();
+
+        var actualPhoneNumber = await response.Content.ReadFromJsonAsync<PhoneNumber>();
+
+        // Assert
+        _mockPhoneNumberManager.Verify(m => m.UpdatePhoneNumberAsync(
+            It.Is<Guid>(id => id.Equals(_phoneNumber.Id)),
+            It.Is<PhoneNumberUpdateDto>(p => p.AccountId.Equals(phoneNumberUpdateDto.AccountId))),
+            Times.Once);
+        Assert.Multiple(() =>
+        {
+            Assert.That(actualPhoneNumber.Id, Is.EqualTo(_phoneNumber.Id));
+            Assert.That(actualPhoneNumber.Number, Is.EqualTo(_phoneNumber.Number));
+            Assert.That(actualPhoneNumber.AccountId, Is.EqualTo(_phoneNumber.AccountId));
+        });
     }
 
     [Test]

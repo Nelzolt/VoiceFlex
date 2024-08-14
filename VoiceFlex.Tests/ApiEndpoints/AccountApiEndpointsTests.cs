@@ -4,6 +4,7 @@ using Moq;
 using System.Net.Http.Json;
 using VoiceFlex.BLL;
 using VoiceFlex.DTO;
+using VoiceFlex.Models;
 using VoiceFlex.Tests.TestHelpers;
 
 namespace VoiceFlex.Tests.ApiEndpoints;
@@ -15,6 +16,7 @@ public class AccountApiEndpointsTests
     private HttpClient _httpClient;
     private Mock<IAccountManager> _mockAccountManager;
     private AccountDto _expectedAccount;
+    private Account _account;
 
     [SetUp]
     public void SetUp()
@@ -35,6 +37,12 @@ public class AccountApiEndpointsTests
                 new(Guid.NewGuid(), "0987654321", accountId),
                 new(Guid.NewGuid(), "1234567890", accountId)
             }
+        };
+        _account = new Account()
+        {
+            Id = Guid.NewGuid(),
+            Description = "test",
+            Status = AccountStatus.Active
         };
     }
 
@@ -86,6 +94,32 @@ public class AccountApiEndpointsTests
             Assert.That(actualPhoneNumbers[1].Id, Is.EqualTo(_expectedAccount.PhoneNumbers[1].Id));
             Assert.That(actualPhoneNumbers[1].Number, Is.EqualTo(_expectedAccount.PhoneNumbers[1].Number));
             Assert.That(actualPhoneNumbers[1].AccountId, Is.EqualTo(_expectedAccount.PhoneNumbers[1].AccountId));
+        });
+    }
+
+    [Test]
+    public async Task UpdateAccountAsync_Should_Call_AccountManager_UpdateAccountAsync_And_Return_UpdatedAccount()
+    {
+        // Arrange
+        var accountUpdateDto = new AccountUpdateDto();
+        _mockAccountManager.Setup(m => m.UpdateAccountAsync(It.IsAny<Guid>(), It.IsAny<AccountUpdateDto>())).ReturnsAsync(_account);
+
+        // Act
+        var response = await _httpClient.PatchAsJsonAsync($"/api/accounts/{_account.Id}", accountUpdateDto);
+        response.EnsureSuccessStatusCode();
+
+        var actualAccount = await response.Content.ReadFromJsonAsync<Account>();
+
+        // Assert
+        _mockAccountManager.Verify(m => m.UpdateAccountAsync(
+            It.Is<Guid>(id => id.Equals(_account.Id)), 
+            It.Is<AccountUpdateDto>(p => p.Status.Equals(accountUpdateDto.Status))),
+            Times.Once);
+        Assert.Multiple(() =>
+        {
+            Assert.That(actualAccount.Id, Is.EqualTo(_account.Id));
+            Assert.That(actualAccount.Description, Is.EqualTo(_account.Description));
+            Assert.That(actualAccount.Status, Is.EqualTo(_account.Status));
         });
     }
 
