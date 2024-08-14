@@ -9,7 +9,10 @@ public static class ApiEndpoints
     {
         app.MapGet("/api", ServiceAlive);
 
-        app.UseHttpsRedirection();
+        app.UseHttpsRedirection()
+            .UseSwagger()
+            .UseSwaggerUI();
+
         return app;
     }
 

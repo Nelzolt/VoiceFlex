@@ -1,10 +1,21 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using VoiceFlex.ApiEndpoints;
 using VoiceFlex.BLL;
 using VoiceFlex.DAL;
 using VoiceFlex.Data;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "VoiceFlex API",
+        Version = "v1"
+    });
+});
 
 #region Database
 
