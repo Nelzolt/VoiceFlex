@@ -35,4 +35,20 @@ public class AccountManagerTests
         _mockAccountAccessor.Verify(accessor => accessor.GetAsync(It.Is<Guid>(p => p.Equals(accountId))), Times.Once);
         Assert.That(actualAccount, Is.EqualTo(_expectedAccount));
     }
+
+    [Test]
+    public async Task CreateAccountAsync_Should_Call_AccountAccessor_CreateAsync_With_Correct_Parameters()
+    {
+        // Arrange
+        _mockAccountAccessor
+            .Setup(accessor => accessor.CreateAsync(It.IsAny<AccountDto>()))
+            .ReturnsAsync(_expectedAccount);
+
+        // Act
+        var actualAccount = await _accountManager.CreateAccountAsync(_expectedAccount);
+
+        // Assert
+        _mockAccountAccessor.Verify(accessor => accessor.CreateAsync(It.Is<AccountDto>(p => p.Equals(_expectedAccount))), Times.Once);
+        Assert.That(actualAccount, Is.EqualTo(_expectedAccount));
+    }
 }

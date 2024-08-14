@@ -9,29 +9,29 @@ public class PhoneNumberManagerTests
 {
     private Mock<IPhoneNumberAccessor> _mockPhoneNumberAccessor;
     private PhoneNumberManager _phoneNumberManager;
-    private List<PhoneNumberDto> _expectedPhoneNumbers;
+    private PhoneNumberDto _expectedPhoneNumber;
 
     [SetUp]
     public void SetUp()
     {
         _mockPhoneNumberAccessor = new Mock<IPhoneNumberAccessor>();
         _phoneNumberManager = new PhoneNumberManager(_mockPhoneNumberAccessor.Object);
-        _expectedPhoneNumbers = new List<PhoneNumberDto>();
+        _expectedPhoneNumber = new PhoneNumberDto();
     }
 
-    //[Test]
-    //public async Task ListPhoneNumbersAsync_ShouldReturnListOfPhoneNumbers()
-    //{
-    //    // Arrange
-    //    _mockPhoneNumberAccessor
-    //        .Setup(accessor => accessor.ListAsync())
-    //        .ReturnsAsync(_expectedPhoneNumbers);
+    [Test]
+    public async Task CreatePhoneNumberAsync_Should_Call_PhoneNumberAccessor_CreateAsync_With_Correct_Parameters()
+    {
+        // Arrange
+        _mockPhoneNumberAccessor
+            .Setup(accessor => accessor.CreateAsync(It.IsAny<PhoneNumberDto>()))
+            .ReturnsAsync(_expectedPhoneNumber);
 
-    //    // Act
-    //    var actualPhoneNumbers = await _phoneNumberManager.ListPhoneNumbersAsync();
+        // Act
+        var actualPhoneNumber = await _phoneNumberManager.CreatePhoneNumberAsync(_expectedPhoneNumber);
 
-    //    // Assert
-    //    _mockPhoneNumberAccessor.Verify(accessor => accessor.ListAsync(), Times.Once);
-    //    Assert.That(actualPhoneNumbers, Is.EqualTo(_expectedPhoneNumbers));
-    //}
+        // Assert
+        _mockPhoneNumberAccessor.Verify(accessor => accessor.CreateAsync(It.Is<PhoneNumberDto>(p => p.Equals(_expectedPhoneNumber))), Times.Once);
+        Assert.That(actualPhoneNumber, Is.EqualTo(_expectedPhoneNumber));
+    }
 }
