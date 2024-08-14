@@ -24,11 +24,13 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 #endregion
 #region BLL Managers
 
+builder.Services.AddScoped<IAccountManager, AccountManager>();
 builder.Services.AddScoped<IPhoneNumberManager, PhoneNumberManager>();
 
 #endregion
 #region Data Accessors
 
+builder.Services.AddScoped<IAccountAccessor, AccountAccessor>();
 builder.Services.AddScoped<IPhoneNumberAccessor, PhoneNumberAccessor>();
 
 #endregion

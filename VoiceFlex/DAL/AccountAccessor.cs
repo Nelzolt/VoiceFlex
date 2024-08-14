@@ -17,12 +17,10 @@ public class AccountAccessor : IAccountAccessor
         => _dbContext = dbContext;
 
     public async Task<AccountDto> GetAsync(Guid id)
-    {
-        return await Task.FromResult(new AccountDto());
-    }
-        //=> await _dbContext.VOICEFLEX_PhoneNumbers
-        //    .AsNoTracking()
-        //    .OrderBy(p => p.Number)
-        //    .Select(p => new PhoneNumberDto(p.Id, p.Number, p.AccountId))
-        //    .ToListAsync();
+        => await _dbContext.VOICEFLEX_Accounts
+            .AsNoTracking()
+            .Where(a => a.Id.Equals(id))
+            .Include(a => a.PhoneNumbers)
+            .Select(a => new AccountDto(a.Id, a.Description, a.Status, a.PhoneNumbers))
+            .FirstOrDefaultAsync();
 }

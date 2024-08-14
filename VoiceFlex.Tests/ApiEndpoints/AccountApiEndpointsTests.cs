@@ -26,7 +26,7 @@ public class AccountApiEndpointsTests
         });
         _httpClient = _factory.CreateClient();
         var accountId = Guid.NewGuid();
-        _expectedAccount = new AccountDto
+        _expectedAccount = new AccountDto()
         {
             Id = accountId,
             PhoneNumbers = new List<PhoneNumberDto>
