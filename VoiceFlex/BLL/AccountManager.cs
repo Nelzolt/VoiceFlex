@@ -10,14 +10,11 @@ public interface IAccountManager
 
 public class AccountManager : IAccountManager
 {
-    private readonly IPhoneNumberAccessor _phoneNumberAccessor;
+    private readonly IAccountAccessor _accountAccessor;
 
-    public AccountManager(IPhoneNumberAccessor phoneNumberAccessor)
-        => _phoneNumberAccessor = phoneNumberAccessor;
+    public AccountManager(IAccountAccessor accountAccessor)
+        => _accountAccessor = accountAccessor;
 
     public async Task<AccountDto> GetAccountWithPhoneNumbersAsync(Guid id)
-    {
-        return await Task.FromResult<AccountDto>(default);
-    }
-        //=> await _phoneNumberAccessor.ListAsync();
+        => await _accountAccessor.GetAsync(id);
 }
