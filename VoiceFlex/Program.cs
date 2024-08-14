@@ -16,15 +16,15 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 builder.Services.AddScoped<IPhoneNumberManager, PhoneNumberManager>();
 
 #endregion
-#region DataAccessors
+#region Data Accessors
 
 builder.Services.AddScoped<IPhoneNumberAccessor, PhoneNumberAccessor>();
 
 #endregion
 
-var app = builder.Build();
+builder.Build()
+    .MapApiEndpoints()
+    .Run();
 
-app.MapApiEndpoints()
-    .UseHttpsRedirection();
-
-app.Run();
+// This line is needed for NUnit WebApplication integration tests
+public partial class Program { }

@@ -11,6 +11,7 @@ public static class ApiEndpoints
         app.MapGet("/api", ServiceAlive);
         app.MapGet("/api/phonenumbers", ListPhoneNumbersAsync);
 
+        app.UseHttpsRedirection();
         return app;
     }
 
