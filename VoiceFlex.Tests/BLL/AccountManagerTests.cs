@@ -2,6 +2,7 @@
 using VoiceFlex.BLL;
 using VoiceFlex.DAL;
 using VoiceFlex.DTO;
+using VoiceFlex.Models;
 
 namespace VoiceFlex.Tests.BLL;
 
@@ -10,6 +11,7 @@ public class AccountManagerTests
     private Mock<IAccountAccessor> _mockAccountAccessor;
     private AccountManager _accountManager;
     private AccountDto _expectedAccount;
+    private Account _account;
 
     [SetUp]
     public void SetUp()
@@ -50,5 +52,26 @@ public class AccountManagerTests
         // Assert
         _mockAccountAccessor.Verify(accessor => accessor.GetAsync(It.Is<Guid>(p => p.Equals(accountId))), Times.Once);
         Assert.That(actualAccount, Is.EqualTo(_expectedAccount));
+    }
+
+    [Test]
+    public async Task UpdateAccountAsync_Should_Call_AccountAccessor_UpdateAsync_With_Correct_Parameters()
+    {
+        // Arrange
+        var accountId = Guid.NewGuid();
+        var accountUpdateDto = new AccountUpdateDto();
+        _mockAccountAccessor
+            .Setup(accessor => accessor.UpdateAsync(It.IsAny<Guid>(), It.IsAny<AccountUpdateDto>()))
+            .ReturnsAsync(_account);
+
+        // Act
+        var actualAccount = await _accountManager.UpdateAccountAsync(accountId, accountUpdateDto);
+
+        // Assert
+        _mockAccountAccessor.Verify(accessor => accessor.UpdateAsync(
+            It.Is<Guid>(p => p.Equals(accountId)),
+            It.Is<AccountUpdateDto>(p => p.Equals(accountUpdateDto))),
+            Times.Once);
+        Assert.That(actualAccount, Is.EqualTo(_account));
     }
 }
