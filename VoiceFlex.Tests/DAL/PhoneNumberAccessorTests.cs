@@ -34,7 +34,7 @@ public class PhoneNumberAccessorTests
         // Act
         var actualPhoneNumbers = await _phoneNumberAccessor.ListAsync();
 
-        // Assert
+        // Assert - Mind that the result list must be sorted by number
         Assert.That(actualPhoneNumbers, Has.Count.EqualTo(_expectedPhoneNumbers.Count));
         Assert.Multiple(() =>
         {

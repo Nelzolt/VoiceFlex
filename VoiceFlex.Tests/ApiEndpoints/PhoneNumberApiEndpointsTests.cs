@@ -1,14 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using System.Text.Json;
+using System.Net.Http.Json;
 using VoiceFlex.BLL;
 using VoiceFlex.DTO;
+using VoiceFlex.Tests.TestHelpers;
 
-namespace VoiceFlex.Tests;
+namespace VoiceFlex.Tests.ApiEndpoints;
 
 [TestFixture]
-public class ApiEndpointsTests
+public class PhoneNumberApiEndpointsTests
 {
     private WebApplicationFactory<Program> _factory;
     private HttpClient _httpClient;
@@ -18,15 +19,12 @@ public class ApiEndpointsTests
     [SetUp]
     public void SetUp()
     {
-        _factory = new WebApplicationFactory<Program>();
         _mockPhoneNumberManager = new Mock<IPhoneNumberManager>();
-        _httpClient = _factory.WithWebHostBuilder(builder =>
+        _factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
-            builder.ConfigureServices(services =>
-            {
-                services.AddSingleton(_mockPhoneNumberManager.Object);
-            });
-        }).CreateClient();
+            builder.AddSingleton(_mockPhoneNumberManager.Object);
+        });
+        _httpClient = _factory.CreateClient();
         _expectedPhoneNumbers = new List<PhoneNumberDto>
         {
             new(Guid.NewGuid(), "0987654321", Guid.NewGuid()),
@@ -44,8 +42,7 @@ public class ApiEndpointsTests
         var response = await _httpClient.GetAsync("/api/phonenumbers");
         response.EnsureSuccessStatusCode();
 
-        var json = await response.Content.ReadAsStringAsync();
-        var actualPhoneNumbers = JsonSerializer.Deserialize<List<PhoneNumberDto>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        var actualPhoneNumbers = await response.Content.ReadFromJsonAsync<List<PhoneNumberDto>>();
 
         // Assert
         Assert.That(actualPhoneNumbers, Has.Count.EqualTo(_expectedPhoneNumbers.Count));

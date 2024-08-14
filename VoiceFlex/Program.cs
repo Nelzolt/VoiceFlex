@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using VoiceFlex;
+using VoiceFlex.ApiEndpoints;
 using VoiceFlex.BLL;
 using VoiceFlex.DAL;
 using VoiceFlex.Data;
@@ -23,6 +23,7 @@ builder.Services.AddScoped<IPhoneNumberAccessor, PhoneNumberAccessor>();
 #endregion
 
 builder.Build()
+    .MapPhoneNumberApiEndpoints()
     .MapApiEndpoints()
     .Run();
 
