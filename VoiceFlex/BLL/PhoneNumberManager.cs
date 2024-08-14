@@ -6,6 +6,7 @@ namespace VoiceFlex.BLL;
 public interface IPhoneNumberManager
 {
     Task<PhoneNumberDto> CreatePhoneNumberAsync(PhoneNumberDto phoneNumber);
+    Task DeletePhoneNumberAsync(Guid id);
 }
 
 public class PhoneNumberManager : IPhoneNumberManager
@@ -17,4 +18,7 @@ public class PhoneNumberManager : IPhoneNumberManager
 
     public async Task<PhoneNumberDto> CreatePhoneNumberAsync(PhoneNumberDto phoneNumber)
         => await _phoneNumberAccessor.CreateAsync(phoneNumber);
+
+    public async Task DeletePhoneNumberAsync(Guid id)
+        => await _phoneNumberAccessor.DeleteAsync(id);
 }

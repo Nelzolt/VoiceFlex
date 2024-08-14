@@ -34,4 +34,17 @@ public class PhoneNumberManagerTests
         _mockPhoneNumberAccessor.Verify(accessor => accessor.CreateAsync(It.Is<PhoneNumberDto>(p => p.Equals(_expectedPhoneNumber))), Times.Once);
         Assert.That(actualPhoneNumber, Is.EqualTo(_expectedPhoneNumber));
     }
+
+    [Test]
+    public async Task DeletePhoneNumberAsync_Should_Call_PhoneNumberAccessor_DeleteAsync_With_Correct_Parameters()
+    {
+        // Arrange
+        var phoneNumberId = Guid.NewGuid();
+
+        // Act
+        await _phoneNumberManager.DeletePhoneNumberAsync(phoneNumberId);
+
+        // Assert
+        _mockPhoneNumberAccessor.Verify(accessor => accessor.DeleteAsync(It.Is<Guid>(p => p.Equals(phoneNumberId))), Times.Once);
+    }
 }

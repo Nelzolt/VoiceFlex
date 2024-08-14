@@ -7,6 +7,7 @@ namespace VoiceFlex.DAL;
 public interface IPhoneNumberAccessor
 {
     Task<PhoneNumberDto> CreateAsync(PhoneNumberDto phoneNumber);
+    Task DeleteAsync(Guid id);
 }
 
 public class PhoneNumberAccessor : IPhoneNumberAccessor
