@@ -53,6 +53,6 @@ public static class PhoneNumberApiEndpoints
     /// </summary>
     /// <param name="id">Phone number id</param>
     private static async Task DeletePhoneNumberAsync(
-        Guid id, IPhoneNumberManager phoneNumberManager)
+        Guid id, IPhoneNumberManager phoneNumberManager, IErrorManager errorManager)
         => await phoneNumberManager.DeletePhoneNumberAsync(id);
 }

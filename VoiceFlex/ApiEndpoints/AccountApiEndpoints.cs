@@ -1,7 +1,6 @@
 ﻿using VoiceFlex.BLL;
 using VoiceFlex.DTO;
 using VoiceFlex.Helpers;
-using VoiceFlex.Models;
 
 namespace VoiceFlex.ApiEndpoints;
 
@@ -34,7 +33,8 @@ public static class AccountApiEndpoints
     /// Get all phone numbers for an account.
     /// </summary>
     /// <param name="id">Account id</param>
-    private static async Task<IResult> GetAccountWithPhoneNumbersAsync(Guid id, IAccountManager accountManager, IErrorManager errorManager)
+    private static async Task<IResult> GetAccountWithPhoneNumbersAsync(
+        Guid id, IAccountManager accountManager, IErrorManager errorManager)
     {
         var accountDto = await accountManager.GetAccountWithPhoneNumbersAsync(id);
         return accountDto is null
@@ -43,7 +43,7 @@ public static class AccountApiEndpoints
     }
 
     /// <summary>
-    /// Set an account to active or suspended.
+    /// Set an account to active (1) or suspended (0).
     /// </summary>
     /// <remarks>
     /// Sample request:
@@ -53,6 +53,12 @@ public static class AccountApiEndpoints
     ///     }
     /// </remarks>
     /// <param name="id">Account id</param>
-    private static async Task<Account> UpdateAccountAsync(Guid id, AccountUpdateDto accountUpdate, IAccountManager accountManager)
-        => await accountManager.UpdateAccountAsync(id, accountUpdate);
+    private static async Task<IResult> UpdateAccountAsync(
+        Guid id, AccountUpdateDto accountUpdate, IAccountManager accountManager, IErrorManager errorManager)
+    {
+        var account = await accountManager.UpdateAccountAsync(id, accountUpdate);
+        return account is null
+            ? errorManager.Error(ErrorCodes.VOICEFLEX_0001)
+            : Results.Ok(account);
+    }
 }

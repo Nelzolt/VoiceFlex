@@ -79,7 +79,7 @@ public class PhoneNumberApiEndpointsTests
         Assert.Multiple(() =>
         {
             Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0002.ToString()));
-            Assert.That(error.Message, Is.EqualTo("The phone number must be between 1 and 11 characters."));
+            Assert.That(error.Message, Is.EqualTo("The number must have at least 1 and not more than 11 characters."));
         });
     }
 
