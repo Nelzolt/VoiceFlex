@@ -1,7 +1,9 @@
 ﻿using Moq;
 using VoiceFlex.BLL;
 using VoiceFlex.DAL;
+using VoiceFlex.Data;
 using VoiceFlex.DTO;
+using VoiceFlex.Helpers;
 using VoiceFlex.Models;
 
 namespace VoiceFlex.Tests.BLL;
@@ -9,16 +11,26 @@ namespace VoiceFlex.Tests.BLL;
 public class PhoneNumberManagerTests
 {
     private Mock<IPhoneNumberAccessor> _mockPhoneNumberAccessor;
+    private Mock<IAccountAccessor> _mockAccountAccessor;
     private PhoneNumberManager _phoneNumberManager;
     private PhoneNumberDto _expectedPhoneNumber;
     private PhoneNumber _phoneNumber;
+    private Guid _suspendedAccountId;
+    private AccountDto _suspendedAccount;
 
     [SetUp]
     public void SetUp()
     {
         _mockPhoneNumberAccessor = new Mock<IPhoneNumberAccessor>();
-        _phoneNumberManager = new PhoneNumberManager(_mockPhoneNumberAccessor.Object);
+        _mockAccountAccessor = new Mock<IAccountAccessor>();
+        _phoneNumberManager = new PhoneNumberManager(_mockPhoneNumberAccessor.Object, _mockAccountAccessor.Object);
         _expectedPhoneNumber = new PhoneNumberDto();
+        _suspendedAccountId = Guid.NewGuid();
+        _suspendedAccount = new AccountDto
+        {
+            Id = _suspendedAccountId,
+            Status = AccountStatus.Suspended
+        };
     }
 
     [Test]
@@ -56,6 +68,41 @@ public class PhoneNumberManagerTests
             It.Is<PhoneNumberUpdateDto>(p => p.Equals(phoneNumberUpdateDto))),
             Times.Once);
         Assert.That(actualPhoneNumber, Is.EqualTo(_phoneNumber));
+    }
+
+    [Test]
+    public async Task UpdatePhoneNumberAsync_Should_Call_AccountAccessor_GetAsync_With_Correct_Parameters()
+    {
+        // Arrange
+        var phoneNumberId = Guid.NewGuid();
+        var phoneNumberUpdateDto = new PhoneNumberUpdateDto { AccountId = _suspendedAccountId };
+        _mockAccountAccessor
+            .Setup(accessor => accessor.GetAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(_suspendedAccount);
+
+        // Act
+        await _phoneNumberManager.UpdatePhoneNumberAsync(phoneNumberId, phoneNumberUpdateDto);
+
+        // Assert
+        _mockAccountAccessor.Verify(accessor => accessor.GetAsync(It.Is<Guid>(p => p.Equals(_suspendedAccountId))), Times.Once);
+    }
+
+    [Test]
+    public async Task UpdatePhoneNumberAsync_With_Suspended_Account_Should_Return_Error()
+    {
+        // Arrange
+        var phoneNumberId = Guid.NewGuid();
+        var phoneNumberUpdateDto = new PhoneNumberUpdateDto { AccountId = _suspendedAccountId };
+        _mockAccountAccessor
+            .Setup(accessor => accessor.GetAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(_suspendedAccount);
+
+        // Act
+        var error = await _phoneNumberManager.UpdatePhoneNumberAsync(phoneNumberId, phoneNumberUpdateDto) as CallError;
+
+        // Assert
+        Assert.That(error, Is.Not.Null);
+        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0004));
     }
 
     [Test]

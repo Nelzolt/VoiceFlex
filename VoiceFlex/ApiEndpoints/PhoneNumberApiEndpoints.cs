@@ -1,7 +1,7 @@
 ﻿using VoiceFlex.BLL;
+using VoiceFlex.Data;
 using VoiceFlex.DTO;
 using VoiceFlex.Helpers;
-using VoiceFlex.Models;
 
 namespace VoiceFlex.ApiEndpoints;
 
@@ -16,16 +16,24 @@ public static class PhoneNumberApiEndpoints
         return app;
     }
 
-    private static async Task<IResult> CreatePhoneNumberAsync(PhoneNumberDto phoneNumber, IPhoneNumberManager phoneNumberManager, IErrorManager errorManager)
+    private static async Task<IResult> CreatePhoneNumberAsync(
+        PhoneNumberDto phoneNumber, IPhoneNumberManager phoneNumberManager, IErrorManager errorManager)
         => (phoneNumber.Number is null
             || phoneNumber.Number.Length < 1
             || phoneNumber.Number.Length > 11)
             ? errorManager.Error(ErrorCodes.VOICEFLEX_0002)
             : Results.Ok(await phoneNumberManager.CreatePhoneNumberAsync(phoneNumber));
 
-    private static async Task<PhoneNumber> UpdatePhoneNumberAsync(Guid id, PhoneNumberUpdateDto phoneNumberUpdate, IPhoneNumberManager phoneNumberManager)
-        => await phoneNumberManager.UpdatePhoneNumberAsync(id, phoneNumberUpdate);
+    private static async Task<IResult> UpdatePhoneNumberAsync(
+        Guid id, PhoneNumberUpdateDto phoneNumberUpdate, IPhoneNumberManager phoneNumberManager, IErrorManager errorManager)
+    {
+        var callResult = await phoneNumberManager.UpdatePhoneNumberAsync(id, phoneNumberUpdate);
+        return (callResult is CallError error)
+            ? errorManager.Error(error.Code)
+            : Results.Ok(callResult);
+    }
 
-    private static async Task DeletePhoneNumberAsync(Guid id, IPhoneNumberManager phoneNumberManager)
+    private static async Task DeletePhoneNumberAsync(
+        Guid id, IPhoneNumberManager phoneNumberManager)
         => await phoneNumberManager.DeletePhoneNumberAsync(id);
 }

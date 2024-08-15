@@ -2,6 +2,7 @@
 using VoiceFlex.DAL;
 using VoiceFlex.Data;
 using VoiceFlex.DTO;
+using VoiceFlex.Helpers;
 using VoiceFlex.Models;
 
 namespace VoiceFlex.Tests.DAL;
@@ -13,21 +14,37 @@ public class PhoneNumberAccessorTests
     private PhoneNumber _phoneNumber;
     private PhoneNumberDto _newPhoneNumber;
     private PhoneNumber _phoneNumberToDelete;
+    private PhoneNumber _assignedPhoneNumber;
     private Guid _accountId;
+    private Guid _newAccountId;
+    private Guid _suspendedAccountId;
     private Account _account;
+    private Account _suspendedAccount;
 
     [SetUp]
     public void SetUp()
     {
         _accountId = Guid.NewGuid();
+        _newAccountId = Guid.NewGuid();
+        _suspendedAccountId = Guid.NewGuid();
         _account = new Account
         {
             Id = _accountId,
             Status = AccountStatus.Active
         };
+        _suspendedAccount = new Account
+        {
+            Id = _suspendedAccountId,
+            Status = AccountStatus.Suspended
+        };
         _phoneNumber = new PhoneNumber
         {
             Number = "0555444"
+        };
+        _assignedPhoneNumber = new PhoneNumber
+        {
+            Number = "055665444",
+            AccountId = _accountId
         };
         _newPhoneNumber = new PhoneNumberDto
         {
@@ -42,7 +59,9 @@ public class PhoneNumberAccessorTests
             .UseInMemoryDatabase(databaseName: "TestDatabase").Options);
         _dbContext.VOICEFLEX_PhoneNumbers.Add(_phoneNumber);
         _dbContext.VOICEFLEX_PhoneNumbers.Add(_phoneNumberToDelete);
+        _dbContext.VOICEFLEX_PhoneNumbers.Add(_assignedPhoneNumber);
         _dbContext.VOICEFLEX_Accounts.Add(_account);
+        _dbContext.VOICEFLEX_Accounts.Add(_suspendedAccount);
         _dbContext.SaveChanges();
 
         _phoneNumberAccessor = new PhoneNumberAccessor(_dbContext);
@@ -65,13 +84,13 @@ public class PhoneNumberAccessorTests
     }
 
     [Test]
-    public async Task UpdateAsync_Should_Update_PhoneNumber_In_Db_And_Return_Updated_PhoneNumber()
+    public async Task UpdateAsync_Should_Assign_Unassign_PhoneNumber_In_Db_And_Return_Updated_PhoneNumber()
     {
         // Arrange
         var phoneNumberUpdateDto = new PhoneNumberUpdateDto { AccountId = _accountId };
 
         // Act
-        var updatedPhoneNumber = await _phoneNumberAccessor.UpdateAsync(_phoneNumber.Id, phoneNumberUpdateDto);
+        var updatedPhoneNumber = await _phoneNumberAccessor.UpdateAsync(_phoneNumber.Id, phoneNumberUpdateDto) as PhoneNumber;
 
         // Assert
         Assert.Multiple(() =>
@@ -85,7 +104,7 @@ public class PhoneNumberAccessorTests
         phoneNumberUpdateDto.AccountId = null;
 
         // Act
-        updatedPhoneNumber = await _phoneNumberAccessor.UpdateAsync(_phoneNumber.Id, phoneNumberUpdateDto);
+        updatedPhoneNumber = await _phoneNumberAccessor.UpdateAsync(_phoneNumber.Id, phoneNumberUpdateDto) as PhoneNumber;
 
         // Assert
         Assert.Multiple(() =>
@@ -93,6 +112,27 @@ public class PhoneNumberAccessorTests
             Assert.That(updatedPhoneNumber.Id, Is.EqualTo(_phoneNumber.Id));
             Assert.That(updatedPhoneNumber.Number, Is.EqualTo(_phoneNumber.Number));
             Assert.That(updatedPhoneNumber.AccountId, Is.Null);
+        });
+    }
+
+    [Test]
+    public async Task UpdateAsync_Should_Not_Assign_PhoneNumber_In_Db_And_Return_Error_If_Already_Assigned()
+    {
+        // Arrange
+        var phoneNumberUpdateDto = new PhoneNumberUpdateDto { AccountId = _newAccountId };
+
+        // Act
+        var error = await _phoneNumberAccessor.UpdateAsync(_assignedPhoneNumber.Id, phoneNumberUpdateDto) as CallError;
+        var actualPhoneNumber = _dbContext.VOICEFLEX_PhoneNumbers.Find(_assignedPhoneNumber.Id);
+
+        // Assert
+        Assert.That(error, Is.Not.Null);
+        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0003));
+        Assert.Multiple(() =>
+        {
+            Assert.That(actualPhoneNumber.Id, Is.EqualTo(_assignedPhoneNumber.Id));
+            Assert.That(actualPhoneNumber.Number, Is.EqualTo(_assignedPhoneNumber.Number));
+            Assert.That(actualPhoneNumber.AccountId, Is.EqualTo(_assignedPhoneNumber.AccountId));
         });
     }
 

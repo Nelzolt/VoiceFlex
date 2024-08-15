@@ -1,5 +1,6 @@
 ﻿using VoiceFlex.Data;
 using VoiceFlex.DTO;
+using VoiceFlex.Helpers;
 using VoiceFlex.Models;
 
 namespace VoiceFlex.DAL;
@@ -7,7 +8,7 @@ namespace VoiceFlex.DAL;
 public interface IPhoneNumberAccessor
 {
     Task<PhoneNumberDto> CreateAsync(PhoneNumberDto phoneNumber);
-    Task<PhoneNumber> UpdateAsync(Guid id, PhoneNumberUpdateDto phoneNumberUpdate);
+    Task<ICallResult> UpdateAsync(Guid id, PhoneNumberUpdateDto phoneNumberUpdate);
     Task DeleteAsync(Guid id);
 }
 
@@ -27,9 +28,15 @@ public class PhoneNumberAccessor : IPhoneNumberAccessor
         return phoneNumber;
     }
 
-    public async Task<PhoneNumber> UpdateAsync(Guid id, PhoneNumberUpdateDto phoneNumberUpdate)
+    public async Task<ICallResult> UpdateAsync(Guid id, PhoneNumberUpdateDto phoneNumberUpdate)
     {
         var dbPhoneNumber = await _dbContext.VOICEFLEX_PhoneNumbers.FindAsync(id);
+        var isAttemptToAssignAnAlreadyAssignedPhoneNumber =
+            dbPhoneNumber.AccountId is not null && phoneNumberUpdate.AccountId is not null;
+        if (isAttemptToAssignAnAlreadyAssignedPhoneNumber)
+        {
+            return new CallError(ErrorCodes.VOICEFLEX_0003);
+        }
         dbPhoneNumber.AccountId = phoneNumberUpdate.AccountId;
         await _dbContext.SaveChangesAsync();
         return dbPhoneNumber;
