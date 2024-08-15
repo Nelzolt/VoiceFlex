@@ -29,8 +29,6 @@ public static class PhoneNumberApiEndpoints
 
     /// <summary>
     /// Assign a phone number to an account.
-    /// Sample phone number IDs:
-    /// Sample account IDs:
     /// </summary>
     private static async Task<IResult> UpdatePhoneNumberAsync(
         Guid id, PhoneNumberUpdateDto phoneNumberUpdate, IPhoneNumberManager phoneNumberManager, IErrorManager errorManager)

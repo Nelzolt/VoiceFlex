@@ -7,6 +7,7 @@ public static class ApiEndpoints
 {
     public static WebApplication MapApiEndpoints(this WebApplication app)
     {
+        app.MapGet("/", () => Results.Redirect("/swagger/index.html"));
         app.MapGet("/api", ServiceAlive);
 
         app.UseHttpsRedirection()
@@ -17,7 +18,7 @@ public static class ApiEndpoints
     }
 
     /// <summary>
-    /// Gets the service version if the service is "alive".
+    /// Get the service version if the service is "alive".
     /// </summary>
     private static ServiceAlive ServiceAlive()
         => new() { Version = Assembly.GetEntryAssembly().GetName().Version.ToString() };

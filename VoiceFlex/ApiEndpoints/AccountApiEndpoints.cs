@@ -24,7 +24,6 @@ public static class AccountApiEndpoints
 
     /// <summary>
     /// Get all phone numbers for an account.
-    /// Sample IDs:
     /// </summary>
     private static async Task<IResult> GetAccountWithPhoneNumbersAsync(Guid id, IAccountManager accountManager, IErrorManager errorManager)
     {
@@ -36,7 +35,6 @@ public static class AccountApiEndpoints
 
     /// <summary>
     /// Set an account to active or suspended.
-    /// Sample IDs:
     /// </summary>
     private static async Task<Account> UpdateAccountAsync(Guid id, AccountUpdateDto accountUpdate, IAccountManager accountManager)
         => await accountManager.UpdateAccountAsync(id, accountUpdate);
