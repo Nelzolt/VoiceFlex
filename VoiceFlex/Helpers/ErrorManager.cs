@@ -1,10 +1,12 @@
-﻿using VoiceFlex.DTO;
+﻿using VoiceFlex.Data;
+using VoiceFlex.DTO;
 
 namespace VoiceFlex.Helpers;
 
 public interface IErrorManager
 {
     public IResult Error(ErrorCodes errorCode);
+    public IResult ErrorOrOk(ICallResult callResult);
 }
 
 public class ErrorManager : IErrorManager
@@ -22,6 +24,11 @@ public class ErrorManager : IErrorManager
         var errorValues = errorList[errorCode].Split('|');
         return Results.Json(new ErrorDto(errorCode, errorValues[1]), statusCode: int.Parse(errorValues[0]));
     }
+
+    public IResult ErrorOrOk(ICallResult callResult)
+        => (callResult is CallError error)
+            ? Error(error.Code)
+            : Results.Ok(callResult);
 }
 
 public enum ErrorCodes
