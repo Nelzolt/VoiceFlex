@@ -16,9 +16,16 @@ public static class AccountApiEndpoints
         return app;
     }
 
+    /// <summary>
+    /// Create a new account.
+    /// </summary>
     private static async Task<AccountDto> CreateAccountAsync(AccountDto account, IAccountManager accountManager)
         => await accountManager.CreateAccountAsync(account);
 
+    /// <summary>
+    /// Get all phone numbers for an account.
+    /// Sample IDs:
+    /// </summary>
     private static async Task<IResult> GetAccountWithPhoneNumbersAsync(Guid id, IAccountManager accountManager, IErrorManager errorManager)
     {
         var accountDto = await accountManager.GetAccountWithPhoneNumbersAsync(id);
@@ -27,6 +34,10 @@ public static class AccountApiEndpoints
             : Results.Ok(accountDto);
     }
 
+    /// <summary>
+    /// Set an account to active or suspended.
+    /// Sample IDs:
+    /// </summary>
     private static async Task<Account> UpdateAccountAsync(Guid id, AccountUpdateDto accountUpdate, IAccountManager accountManager)
         => await accountManager.UpdateAccountAsync(id, accountUpdate);
 }

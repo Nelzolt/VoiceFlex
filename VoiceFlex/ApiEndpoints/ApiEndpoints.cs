@@ -16,6 +16,9 @@ public static class ApiEndpoints
         return app;
     }
 
+    /// <summary>
+    /// Gets the service version if the service is "alive".
+    /// </summary>
     private static ServiceAlive ServiceAlive()
         => new() { Version = Assembly.GetEntryAssembly().GetName().Version.ToString() };
 }

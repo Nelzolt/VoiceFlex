@@ -16,6 +16,9 @@ public static class PhoneNumberApiEndpoints
         return app;
     }
 
+    /// <summary>
+    /// Create a new phone number.
+    /// </summary>
     private static async Task<IResult> CreatePhoneNumberAsync(
         PhoneNumberDto phoneNumber, IPhoneNumberManager phoneNumberManager, IErrorManager errorManager)
         => (phoneNumber.Number is null
@@ -24,6 +27,11 @@ public static class PhoneNumberApiEndpoints
             ? errorManager.Error(ErrorCodes.VOICEFLEX_0002)
             : Results.Ok(await phoneNumberManager.CreatePhoneNumberAsync(phoneNumber));
 
+    /// <summary>
+    /// Assign a phone number to an account.
+    /// Sample phone number IDs:
+    /// Sample account IDs:
+    /// </summary>
     private static async Task<IResult> UpdatePhoneNumberAsync(
         Guid id, PhoneNumberUpdateDto phoneNumberUpdate, IPhoneNumberManager phoneNumberManager, IErrorManager errorManager)
     {
@@ -33,6 +41,9 @@ public static class PhoneNumberApiEndpoints
             : Results.Ok(callResult);
     }
 
+    /// <summary>
+    /// Delete a phone number.
+    /// </summary>
     private static async Task DeletePhoneNumberAsync(
         Guid id, IPhoneNumberManager phoneNumberManager)
         => await phoneNumberManager.DeletePhoneNumberAsync(id);

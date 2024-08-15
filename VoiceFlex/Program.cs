@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using System.Reflection;
 using System.Text.Json.Serialization;
 using VoiceFlex.ApiEndpoints;
 using VoiceFlex.BLL;
@@ -11,14 +12,17 @@ using VoiceFlex.Helpers;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
+builder.Services.AddSwaggerGen(options =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo
+    options.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "VoiceFlex API",
         Version = "v1"
     });
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
+
 builder.Services.Configure<JsonOptions>(options =>
     options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault | JsonIgnoreCondition.WhenWritingNull);
 
