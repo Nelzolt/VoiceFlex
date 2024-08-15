@@ -23,8 +23,8 @@ public static class AccountApiEndpoints
     {
         var accountDto = await accountManager.GetAccountWithPhoneNumbersAsync(id);
         return accountDto is null
-            ? errorManager.Throw(ErrorCodes.VOICEFLEX_0001)
-            : Results.Json(accountDto);
+            ? errorManager.Error(ErrorCodes.VOICEFLEX_0001)
+            : Results.Ok(accountDto);
     }
 
     private static async Task<Account> UpdateAccountAsync(Guid id, AccountUpdateDto accountUpdate, IAccountManager accountManager)

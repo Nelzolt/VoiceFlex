@@ -5,6 +5,7 @@ using Moq;
 using System.Net.Http.Json;
 using VoiceFlex.BLL;
 using VoiceFlex.DTO;
+using VoiceFlex.Helpers;
 using VoiceFlex.Models;
 using VoiceFlex.Tests.TestHelpers;
 
@@ -116,7 +117,7 @@ public class AccountApiEndpointsTests
         // Assert
         Assert.Multiple(() =>
         {
-            Assert.That(error.Code, Is.EqualTo("VOICEFLEX_0001"));
+            Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0001.ToString()));
             Assert.That(error.Message, Is.EqualTo("A resource with this id could not be found."));
         });
     }

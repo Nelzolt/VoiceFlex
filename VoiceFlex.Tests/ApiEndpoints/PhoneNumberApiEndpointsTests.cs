@@ -4,6 +4,7 @@ using Moq;
 using System.Net.Http.Json;
 using VoiceFlex.BLL;
 using VoiceFlex.DTO;
+using VoiceFlex.Helpers;
 using VoiceFlex.Models;
 using VoiceFlex.Tests.TestHelpers;
 
@@ -56,6 +57,30 @@ public class PhoneNumberApiEndpointsTests
             p => p.Number.Equals(_expectedPhoneNumber.Number))),
             Times.Once);
         Assert.That(actualPhoneNumber.Number, Is.EqualTo(_expectedPhoneNumber.Number));
+    }
+
+    [TestCase(null)]
+    [TestCase("")]
+    [TestCase("123456789012")]
+    public async Task CreatePhoneNumberAsync_Returns_400_Error_If_Number_Has_Wrong_Length(string number)
+    {
+        ErrorDto error = null;
+        _expectedPhoneNumber.Number = number;
+
+        // Arrange
+        _mockPhoneNumberManager.Setup(m => m.CreatePhoneNumberAsync(It.IsAny<PhoneNumberDto>())).ReturnsAsync(_expectedPhoneNumber);
+
+        // Act
+        var response = await _httpClient.PostAsJsonAsync("/api/phonenumbers", _expectedPhoneNumber);
+        var ex = Assert.Throws<HttpRequestException>(() => response.EnsureSuccessStatusCode());
+        error = await response.Content.ReadFromJsonAsync<ErrorDto>();
+
+        // Assert
+        Assert.Multiple(() =>
+        {
+            Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0002.ToString()));
+            Assert.That(error.Message, Is.EqualTo("The phone number must be between 1 and 11 characters."));
+        });
     }
 
     [Test]
