@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.Testing;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using System.Net.Http.Json;
@@ -94,6 +95,29 @@ public class AccountApiEndpointsTests
             Assert.That(actualPhoneNumbers[1].Id, Is.EqualTo(_expectedAccount.PhoneNumbers[1].Id));
             Assert.That(actualPhoneNumbers[1].Number, Is.EqualTo(_expectedAccount.PhoneNumbers[1].Number));
             Assert.That(actualPhoneNumbers[1].AccountId, Is.EqualTo(_expectedAccount.PhoneNumbers[1].AccountId));
+        });
+    }
+
+    [Test]
+    public async Task GetAccountWithPhoneNumbersAsync_Returns_404_Error_For_Invalid_Id()
+    {
+        ErrorDto error = null;
+        var accountId = Guid.NewGuid();
+        _expectedAccount = null;
+
+        // Arrange
+        _mockAccountManager.Setup(m => m.GetAccountWithPhoneNumbersAsync(It.IsAny<Guid>())).ReturnsAsync(_expectedAccount);
+
+        // Act
+        var response = await _httpClient.GetAsync($"/api/accounts/{accountId}/phonenumbers");
+        var ex = Assert.Throws<HttpRequestException>(() => response.EnsureSuccessStatusCode());
+        error = await response.Content.ReadFromJsonAsync<ErrorDto>();
+
+        // Assert
+        Assert.Multiple(() =>
+        {
+            Assert.That(error.Code, Is.EqualTo("VOICEFLEX_0001"));
+            Assert.That(error.Message, Is.EqualTo("A resource with this id could not be found."));
         });
     }
 

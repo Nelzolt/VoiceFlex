@@ -6,6 +6,7 @@ using VoiceFlex.ApiEndpoints;
 using VoiceFlex.BLL;
 using VoiceFlex.DAL;
 using VoiceFlex.Data;
+using VoiceFlex.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 
 builder.Services.AddScoped<IAccountManager, AccountManager>();
 builder.Services.AddScoped<IPhoneNumberManager, PhoneNumberManager>();
+builder.Services.AddScoped<IErrorManager, ErrorManager>();
 
 #endregion
 #region Data Accessors

@@ -1,5 +1,6 @@
 ﻿using VoiceFlex.BLL;
 using VoiceFlex.DTO;
+using VoiceFlex.Helpers;
 using VoiceFlex.Models;
 
 namespace VoiceFlex.ApiEndpoints;
@@ -18,8 +19,13 @@ public static class AccountApiEndpoints
     private static async Task<AccountDto> CreateAccountAsync(AccountDto account, IAccountManager accountManager)
         => await accountManager.CreateAccountAsync(account);
 
-    private static async Task<AccountDto> GetAccountWithPhoneNumbersAsync(Guid id, IAccountManager accountManager)
-        => await accountManager.GetAccountWithPhoneNumbersAsync(id);
+    private static async Task<IResult> GetAccountWithPhoneNumbersAsync(Guid id, IAccountManager accountManager, IErrorManager errorManager)
+    {
+        var accountDto = await accountManager.GetAccountWithPhoneNumbersAsync(id);
+        return accountDto is null
+            ? errorManager.Throw(ErrorCodes.VOICEFLEX_0001)
+            : Results.Json(accountDto);
+    }
 
     private static async Task<Account> UpdateAccountAsync(Guid id, AccountUpdateDto accountUpdate, IAccountManager accountManager)
         => await accountManager.UpdateAccountAsync(id, accountUpdate);
