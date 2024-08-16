@@ -27,11 +27,7 @@ public static class PhoneNumberApiEndpoints
     /// </remarks>
     private static async Task<IResult> CreatePhoneNumberAsync(
         PhoneNumberDto phoneNumber, IPhoneNumberManager phoneNumberManager, IErrorManager errorManager)
-        => (phoneNumber.Number is null
-            || phoneNumber.Number.Length < 1
-            || phoneNumber.Number.Length > 11)
-            ? errorManager.Error(ErrorCodes.VOICEFLEX_0002)
-            : Results.Ok(await phoneNumberManager.CreatePhoneNumberAsync(phoneNumber));
+        => errorManager.ErrorOrOk(await phoneNumberManager.CreatePhoneNumberAsync(phoneNumber));
 
     /// <summary>
     /// Assign a phone number to an account.

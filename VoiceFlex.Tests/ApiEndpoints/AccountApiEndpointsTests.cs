@@ -16,6 +16,7 @@ public class AccountApiEndpointsTests
 {
     private WebApplicationFactory<Program> _factory;
     private HttpClient _httpClient;
+    private Mock<IPhoneNumberValidator> _mockPhoneNumberValidator;
     private Mock<IAccountManager> _mockAccountManager;
     private AccountDto _expectedAccount;
     private Account _account;
@@ -23,9 +24,11 @@ public class AccountApiEndpointsTests
     [SetUp]
     public void SetUp()
     {
+        _mockPhoneNumberValidator = new Mock<IPhoneNumberValidator>();
         _mockAccountManager = new Mock<IAccountManager>();
         _factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
+            builder.AddSingleton(_mockPhoneNumberValidator.Object);
             builder.AddSingleton(_mockAccountManager.Object);
         });
         _httpClient = _factory.CreateClient();

@@ -71,7 +71,7 @@ public class PhoneNumberAccessorTests
     public async Task CreateAsync_Should_Add_PhoneNumber_To_Db_And_Return_PhoneNumber_With_Id()
     {
         // Act
-        var actualPhoneNumber = await _phoneNumberAccessor.CreateAsync(_newPhoneNumber);
+        var actualPhoneNumber = await _phoneNumberAccessor.CreateAsync(_newPhoneNumber) as PhoneNumber;
 
         // Assert
         Assert.Multiple(() =>

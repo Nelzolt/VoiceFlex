@@ -8,21 +8,32 @@ namespace VoiceFlex.BLL;
 
 public interface IPhoneNumberManager
 {
-    Task<PhoneNumberDto> CreatePhoneNumberAsync(PhoneNumberDto phoneNumber);
+    Task<ICallResult> CreatePhoneNumberAsync(PhoneNumberDto phoneNumber);
     Task<ICallResult> UpdatePhoneNumberAsync(Guid id, PhoneNumberUpdateDto phoneNumberUpdateDto);
     Task DeletePhoneNumberAsync(Guid id);
 }
 
 public class PhoneNumberManager : IPhoneNumberManager
 {
+    private readonly IPhoneNumberValidator _phoneNumberValidator;
     private readonly IAccountAccessor _accountAccessor;
     private readonly IPhoneNumberAccessor _phoneNumberAccessor;
 
-    public PhoneNumberManager(IPhoneNumberAccessor phoneNumberAccessor, IAccountAccessor accountAccessor)
-        => (_phoneNumberAccessor, _accountAccessor) = (phoneNumberAccessor, accountAccessor);
+    public PhoneNumberManager(
+        IPhoneNumberValidator phoneNumberValidator,
+        IPhoneNumberAccessor phoneNumberAccessor,
+        IAccountAccessor accountAccessor)
+        => (_phoneNumberValidator, _phoneNumberAccessor, _accountAccessor)
+        = (phoneNumberValidator, phoneNumberAccessor, accountAccessor);
 
-    public async Task<PhoneNumberDto> CreatePhoneNumberAsync(PhoneNumberDto phoneNumber)
-        => await _phoneNumberAccessor.CreateAsync(phoneNumber);
+    public async Task<ICallResult> CreatePhoneNumberAsync(PhoneNumberDto phoneNumber)
+    {
+        if (_phoneNumberValidator.Error(phoneNumber, out var callError))
+        {
+            return callError;
+        }
+        return await _phoneNumberAccessor.CreateAsync(phoneNumber);
+    }
 
     public async Task<ICallResult> UpdatePhoneNumberAsync(Guid id, PhoneNumberUpdateDto phoneNumberUpdateDto)
     {

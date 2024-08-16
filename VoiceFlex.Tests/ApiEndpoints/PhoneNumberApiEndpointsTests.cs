@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using System.Net.Http.Json;
 using VoiceFlex.BLL;
+using VoiceFlex.Data;
 using VoiceFlex.DTO;
 using VoiceFlex.Helpers;
 using VoiceFlex.Models;
@@ -15,6 +16,7 @@ public class PhoneNumberApiEndpointsTests
 {
     private WebApplicationFactory<Program> _factory;
     private HttpClient _httpClient;
+    private Mock<IPhoneNumberValidator> _mockPhoneNumberValidator;
     private Mock<IPhoneNumberManager> _mockPhoneNumberManager;
     private PhoneNumberDto _expectedPhoneNumber;
     private PhoneNumber _phoneNumber;
@@ -22,9 +24,11 @@ public class PhoneNumberApiEndpointsTests
     [SetUp]
     public void SetUp()
     {
+        _mockPhoneNumberValidator = new Mock<IPhoneNumberValidator>();
         _mockPhoneNumberManager = new Mock<IPhoneNumberManager>();
         _factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
+            builder.AddSingleton(_mockPhoneNumberValidator.Object);
             builder.AddSingleton(_mockPhoneNumberManager.Object);
         });
         _httpClient = _factory.CreateClient();
@@ -44,42 +48,39 @@ public class PhoneNumberApiEndpointsTests
     public async Task CreatePhoneNumberAsync_Should_Call_PhoneNumberManager_CreatePhoneNumberAsync_And_Return_NewPhoneNumber()
     {
         // Arrange
-        _mockPhoneNumberManager.Setup(m => m.CreatePhoneNumberAsync(It.IsAny<PhoneNumberDto>())).ReturnsAsync(_expectedPhoneNumber);
+        _mockPhoneNumberManager.Setup(m => m.CreatePhoneNumberAsync(It.IsAny<PhoneNumberDto>())).ReturnsAsync(_phoneNumber);
 
         // Act
-        var response = await _httpClient.PostAsJsonAsync("/api/phonenumbers", _expectedPhoneNumber);
+        var response = await _httpClient.PostAsJsonAsync("/api/phonenumbers", _phoneNumber);
         response.EnsureSuccessStatusCode();
 
         var actualPhoneNumber = await response.Content.ReadFromJsonAsync<PhoneNumberDto>();
 
         // Assert
         _mockPhoneNumberManager.Verify(m => m.CreatePhoneNumberAsync(It.Is<PhoneNumberDto>(
-            p => p.Number.Equals(_expectedPhoneNumber.Number))),
+            p => p.Number.Equals(_phoneNumber.Number))),
             Times.Once);
-        Assert.That(actualPhoneNumber.Number, Is.EqualTo(_expectedPhoneNumber.Number));
+        Assert.That(actualPhoneNumber.Number, Is.EqualTo(_phoneNumber.Number));
     }
 
-    [TestCase(null)]
-    [TestCase("")]
-    [TestCase("123456789012")]
-    public async Task CreatePhoneNumberAsync_Returns_400_Error_If_Number_Has_Wrong_Length(string number)
+    [Test]
+    public async Task CreatePhoneNumberAsync_Returns_400_Error_If_Number_Has_Wrong_Length()
     {
-        ErrorDto error = null;
-        _expectedPhoneNumber.Number = number;
-
         // Arrange
-        _mockPhoneNumberManager.Setup(m => m.CreatePhoneNumberAsync(It.IsAny<PhoneNumberDto>())).ReturnsAsync(_expectedPhoneNumber);
+        var error = new CallError(ErrorCodes.VOICEFLEX_0002);
+        //_mockPhoneNumberValidator.Setup(m => m.Error(It.IsAny<PhoneNumberDto>(), out error)).Returns(true);
+        _mockPhoneNumberManager.Setup(m => m.CreatePhoneNumberAsync(It.IsAny<PhoneNumberDto>())).ReturnsAsync(error);
 
         // Act
         var response = await _httpClient.PostAsJsonAsync("/api/phonenumbers", _expectedPhoneNumber);
         var ex = Assert.Throws<HttpRequestException>(() => response.EnsureSuccessStatusCode());
-        error = await response.Content.ReadFromJsonAsync<ErrorDto>();
+        var result = await response.Content.ReadFromJsonAsync<ErrorDto>();
 
         // Assert
         Assert.Multiple(() =>
         {
-            Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0002.ToString()));
-            Assert.That(error.Message, Is.EqualTo("The number must have at least 1 and not more than 11 characters."));
+            Assert.That(result.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0002.ToString()));
+            Assert.That(result.Message, Is.EqualTo("The number must have at least 1 and not more than 11 characters."));
         });
     }
 

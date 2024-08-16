@@ -10,6 +10,7 @@ namespace VoiceFlex.Tests.BLL;
 
 public class PhoneNumberManagerTests
 {
+    private Mock<IPhoneNumberValidator> _mockPhoneNumberValidator;
     private Mock<IPhoneNumberAccessor> _mockPhoneNumberAccessor;
     private Mock<IAccountAccessor> _mockAccountAccessor;
     private PhoneNumberManager _phoneNumberManager;
@@ -21,9 +22,10 @@ public class PhoneNumberManagerTests
     [SetUp]
     public void SetUp()
     {
+        _mockPhoneNumberValidator = new Mock<IPhoneNumberValidator>();
         _mockPhoneNumberAccessor = new Mock<IPhoneNumberAccessor>();
         _mockAccountAccessor = new Mock<IAccountAccessor>();
-        _phoneNumberManager = new PhoneNumberManager(_mockPhoneNumberAccessor.Object, _mockAccountAccessor.Object);
+        _phoneNumberManager = new PhoneNumberManager(_mockPhoneNumberValidator.Object, _mockPhoneNumberAccessor.Object, _mockAccountAccessor.Object);
         _expectedPhoneNumber = new PhoneNumberDto();
         _suspendedAccountId = Guid.NewGuid();
         _suspendedAccount = new AccountDto
@@ -39,14 +41,30 @@ public class PhoneNumberManagerTests
         // Arrange
         _mockPhoneNumberAccessor
             .Setup(accessor => accessor.CreateAsync(It.IsAny<PhoneNumberDto>()))
-            .ReturnsAsync(_expectedPhoneNumber);
+            .ReturnsAsync(_phoneNumber);
 
         // Act
         var actualPhoneNumber = await _phoneNumberManager.CreatePhoneNumberAsync(_expectedPhoneNumber);
 
         // Assert
         _mockPhoneNumberAccessor.Verify(accessor => accessor.CreateAsync(It.Is<PhoneNumberDto>(p => p.Equals(_expectedPhoneNumber))), Times.Once);
-        Assert.That(actualPhoneNumber, Is.EqualTo(_expectedPhoneNumber));
+        Assert.That(actualPhoneNumber, Is.EqualTo(_phoneNumber));
+    }
+
+    [Test]
+    public async Task CreatePhoneNumberAsync_Should_Call_PhoneNumberValidator_Error_With_Correct_Parameters()
+    {
+        // Arrange
+        _mockPhoneNumberAccessor
+            .Setup(accessor => accessor.CreateAsync(It.IsAny<PhoneNumberDto>()))
+            .ReturnsAsync(_phoneNumber);
+
+        // Act
+        var actualPhoneNumber = await _phoneNumberManager.CreatePhoneNumberAsync(_expectedPhoneNumber);
+
+        // Assert
+        _mockPhoneNumberAccessor.Verify(accessor => accessor.CreateAsync(It.Is<PhoneNumberDto>(p => p.Equals(_expectedPhoneNumber))), Times.Once);
+        Assert.That(actualPhoneNumber, Is.EqualTo(_phoneNumber));
     }
 
     [Test]

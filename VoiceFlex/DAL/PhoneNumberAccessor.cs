@@ -7,7 +7,7 @@ namespace VoiceFlex.DAL;
 
 public interface IPhoneNumberAccessor
 {
-    Task<PhoneNumberDto> CreateAsync(PhoneNumberDto phoneNumber);
+    Task<ICallResult> CreateAsync(PhoneNumberDto phoneNumber);
     Task<ICallResult> UpdateAsync(Guid id, PhoneNumberUpdateDto phoneNumberUpdate);
     Task DeleteAsync(Guid id);
 }
@@ -19,13 +19,12 @@ public class PhoneNumberAccessor : IPhoneNumberAccessor
     public PhoneNumberAccessor(ApplicationDbContext dbContext)
         => _dbContext = dbContext;
 
-    public async Task<PhoneNumberDto> CreateAsync(PhoneNumberDto phoneNumber)
+    public async Task<ICallResult> CreateAsync(PhoneNumberDto phoneNumber)
     {
         var dbPhoneNumber = new PhoneNumber(phoneNumber);
         await _dbContext.VOICEFLEX_PhoneNumbers.AddAsync(dbPhoneNumber);
         await _dbContext.SaveChangesAsync();
-        phoneNumber.Id = dbPhoneNumber.Id;
-        return phoneNumber;
+        return dbPhoneNumber;
     }
 
     public async Task<ICallResult> UpdateAsync(Guid id, PhoneNumberUpdateDto phoneNumberUpdate)

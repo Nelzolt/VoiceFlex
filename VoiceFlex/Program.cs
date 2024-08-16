@@ -35,6 +35,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 
 builder.Services.AddScoped<IAccountManager, AccountManager>();
 builder.Services.AddScoped<IPhoneNumberManager, PhoneNumberManager>();
+builder.Services.AddScoped<IPhoneNumberValidator, PhoneNumberValidator>();
 builder.Services.AddScoped<IErrorManager, ErrorManager>();
 
 #endregion
