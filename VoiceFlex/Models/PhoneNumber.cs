@@ -1,9 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations.Schema;
 using VoiceFlex.Data;
 using VoiceFlex.DTO;
 
 namespace VoiceFlex.Models
 {
+    [Index(nameof(Number), IsUnique = true)]
     public class PhoneNumber : ICallResult
     {
         public Guid Id { get; set; }

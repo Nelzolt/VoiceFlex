@@ -1,4 +1,5 @@
-﻿using VoiceFlex.BLL;
+﻿using Microsoft.EntityFrameworkCore;
+using VoiceFlex.BLL;
 using VoiceFlex.Data;
 using VoiceFlex.DTO;
 using VoiceFlex.Models;
@@ -21,6 +22,15 @@ public class PhoneNumberAccessor : IPhoneNumberAccessor
 
     public async Task<ICallResult> CreateAsync(PhoneNumberDto phoneNumber)
     {
+        var duplicatePhoneNumber = await _dbContext.VOICEFLEX_PhoneNumbers
+            .AsNoTracking()
+            .Where(p => p.Number.Equals(phoneNumber.Number))
+            .FirstOrDefaultAsync();
+        if (duplicatePhoneNumber is not null)
+        {
+            return new CallError(ErrorCodes.VOICEFLEX_0007);
+        }
+
         var dbPhoneNumber = new PhoneNumber(phoneNumber);
         await _dbContext.VOICEFLEX_PhoneNumbers.AddAsync(dbPhoneNumber);
         await _dbContext.SaveChangesAsync();
@@ -36,6 +46,7 @@ public class PhoneNumberAccessor : IPhoneNumberAccessor
         {
             return new CallError(ErrorCodes.VOICEFLEX_0003);
         }
+
         dbPhoneNumber.AccountId = phoneNumberUpdate.AccountId;
         await _dbContext.SaveChangesAsync();
         return dbPhoneNumber;

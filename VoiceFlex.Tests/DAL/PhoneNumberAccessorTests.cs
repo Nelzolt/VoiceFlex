@@ -84,6 +84,28 @@ public class PhoneNumberAccessorTests
     }
 
     [Test]
+    public async Task CreateAsync_Should_Not_Add_PhoneNumber_To_Db_And_Return_Error_If_Number_Already_Exists()
+    {
+        // Arrange
+        _newPhoneNumber.Number = "0555444";
+
+        // Act
+        var error = await _phoneNumberAccessor.CreateAsync(_newPhoneNumber) as CallError;
+        var actualPhoneNumbers = _dbContext.VOICEFLEX_PhoneNumbers
+            .AsNoTracking()
+            .Where(p => p.Number.Equals(_newPhoneNumber.Number))
+            .ToList();
+
+        // Assert
+        Assert.That(error, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0007));
+            Assert.That(actualPhoneNumbers, Has.Count.EqualTo(1));
+        });
+    }
+
+    [Test]
     public async Task UpdateAsync_Should_Assign_Unassign_PhoneNumber_In_Db_And_Return_Updated_PhoneNumber()
     {
         // Arrange
