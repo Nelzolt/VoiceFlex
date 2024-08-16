@@ -40,6 +40,11 @@ public class PhoneNumberAccessor : IPhoneNumberAccessor
     public async Task<ICallResult> UpdateAsync(Guid id, PhoneNumberUpdateDto phoneNumberUpdate)
     {
         var dbPhoneNumber = await _dbContext.VOICEFLEX_PhoneNumbers.FindAsync(id);
+        if (dbPhoneNumber is null)
+        {
+            return new CallError(ErrorCodes.VOICEFLEX_0001);
+        }
+
         var isAttemptToAssignAnAlreadyAssignedPhoneNumber =
             dbPhoneNumber.AccountId is not null && phoneNumberUpdate.AccountId is not null;
         if (isAttemptToAssignAnAlreadyAssignedPhoneNumber)
