@@ -9,7 +9,7 @@ public interface IPhoneNumberManager
 {
     Task<ICallResult> CreatePhoneNumberAsync(PhoneNumberDto phoneNumber);
     Task<ICallResult> UpdatePhoneNumberAsync(Guid id, PhoneNumberUpdateDto phoneNumberUpdateDto);
-    Task DeletePhoneNumberAsync(Guid id);
+    Task<ICallResult> DeletePhoneNumberAsync(Guid id);
 }
 
 public class PhoneNumberManager : IPhoneNumberManager
@@ -52,6 +52,6 @@ public class PhoneNumberManager : IPhoneNumberManager
         return await _phoneNumberAccessor.UpdateAsync(id, phoneNumberUpdateDto);
     }
 
-    public async Task DeletePhoneNumberAsync(Guid id)
+    public async Task<ICallResult> DeletePhoneNumberAsync(Guid id)
         => await _phoneNumberAccessor.DeleteAsync(id);
 }

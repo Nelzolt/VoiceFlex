@@ -40,14 +40,14 @@ public static class PhoneNumberApiEndpoints
     /// </remarks>
     /// <param name="id">Phone number id</param>
     private static async Task<IResult> UpdatePhoneNumberAsync(
-    Guid id, PhoneNumberUpdateDto phoneNumberUpdate, IPhoneNumberManager phoneNumberManager, IErrorManager errorManager)
+        Guid id, PhoneNumberUpdateDto phoneNumberUpdate, IPhoneNumberManager phoneNumberManager, IErrorManager errorManager)
         => errorManager.ErrorOrOk(await phoneNumberManager.UpdatePhoneNumberAsync(id, phoneNumberUpdate));
 
     /// <summary>
     /// Delete a phone number.
     /// </summary>
     /// <param name="id">Phone number id</param>
-    private static async Task DeletePhoneNumberAsync(
+    private static async Task<IResult> DeletePhoneNumberAsync(
         Guid id, IPhoneNumberManager phoneNumberManager, IErrorManager errorManager)
-        => await phoneNumberManager.DeletePhoneNumberAsync(id);
+        => errorManager.ErrorOrOk(await phoneNumberManager.DeletePhoneNumberAsync(id));
 }

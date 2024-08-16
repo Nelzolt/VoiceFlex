@@ -10,7 +10,7 @@ public interface IPhoneNumberAccessor
 {
     Task<ICallResult> CreateAsync(PhoneNumberDto phoneNumber);
     Task<ICallResult> UpdateAsync(Guid id, PhoneNumberUpdateDto phoneNumberUpdate);
-    Task DeleteAsync(Guid id);
+    Task<ICallResult> DeleteAsync(Guid id);
 }
 
 public class PhoneNumberAccessor : IPhoneNumberAccessor
@@ -52,10 +52,16 @@ public class PhoneNumberAccessor : IPhoneNumberAccessor
         return dbPhoneNumber;
     }
 
-    public async Task DeleteAsync(Guid id)
+    public async Task<ICallResult> DeleteAsync(Guid id)
     {
         var phoneNumber = await _dbContext.VOICEFLEX_PhoneNumbers.FindAsync(id);
+        if (phoneNumber is null)
+        {
+            return new CallError(ErrorCodes.VOICEFLEX_0001);
+        }
+
         _dbContext.VOICEFLEX_PhoneNumbers.Remove(phoneNumber);
         await _dbContext.SaveChangesAsync();
+        return null;
     }
 }
