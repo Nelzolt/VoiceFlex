@@ -1,4 +1,4 @@
-﻿namespace VoiceFlex.Data;
+﻿namespace VoiceFlex.DTO;
 
 public interface ICallResult
 {

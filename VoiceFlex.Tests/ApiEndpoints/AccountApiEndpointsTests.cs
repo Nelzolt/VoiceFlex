@@ -19,6 +19,7 @@ public class AccountApiEndpointsTests
     private Mock<IAccountManager> _mockAccountManager;
     private AccountDto _expectedAccount;
     private Account _account;
+    private CallError _callError;
 
     [SetUp]
     public void SetUp()
@@ -48,6 +49,7 @@ public class AccountApiEndpointsTests
             Description = "test",
             Status = AccountStatus.Active
         };
+        _callError = new CallError(ErrorCodes.VOICEFLEX_0001);
     }
 
     [Test]
@@ -71,6 +73,26 @@ public class AccountApiEndpointsTests
         {
             Assert.That(actualAccount.Description, Is.EqualTo(_account.Description));
             Assert.That(actualAccount.Status, Is.EqualTo(_account.Status));
+        });
+    }
+
+    [Test]
+    public async Task CreateAccountAsync_Should_Return_Error_From_Manager()
+    {
+        // Arrange
+        var createError = new CallError(ErrorCodes.VOICEFLEX_0006);
+        _mockAccountManager.Setup(m => m.CreateAccountAsync(It.IsAny<AccountDto>())).ReturnsAsync(createError);
+
+        // Act & Assert Exception
+        var response = await _httpClient.PostAsJsonAsync($"/api/accounts", _account);
+        var ex = Assert.Throws<HttpRequestException>(() => response.EnsureSuccessStatusCode());
+        var error = await response.Content.ReadFromJsonAsync<ErrorDto>();
+
+        // Assert
+        Assert.Multiple(() =>
+        {
+            Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0006.ToString()));
+            Assert.That(error.Message, Is.EqualTo("The description must have at least 1 and not more than 1023 characters."));
         });
     }
 
@@ -102,19 +124,15 @@ public class AccountApiEndpointsTests
     }
 
     [Test]
-    public async Task GetAccountWithPhoneNumbersAsync_Returns_404_Error_For_Invalid_Id()
+    public async Task GetAccountWithPhoneNumbersAsync_Should_Return_Error_From_Manager()
     {
-        ErrorDto error = null;
-        var accountId = Guid.NewGuid();
-        _expectedAccount = null;
-
         // Arrange
-        _mockAccountManager.Setup(m => m.GetAccountWithPhoneNumbersAsync(It.IsAny<Guid>())).ReturnsAsync(_expectedAccount);
+        _mockAccountManager.Setup(m => m.GetAccountWithPhoneNumbersAsync(It.IsAny<Guid>())).ReturnsAsync(_callError);
 
-        // Act
-        var response = await _httpClient.GetAsync($"/api/accounts/{accountId}/phonenumbers");
+        // Act & Assert Exception
+        var response = await _httpClient.GetAsync($"/api/accounts/{_expectedAccount.Id}/phonenumbers");
         var ex = Assert.Throws<HttpRequestException>(() => response.EnsureSuccessStatusCode());
-        error = await response.Content.ReadFromJsonAsync<ErrorDto>();
+        var error = await response.Content.ReadFromJsonAsync<ErrorDto>();
 
         // Assert
         Assert.Multiple(() =>
@@ -147,6 +165,26 @@ public class AccountApiEndpointsTests
             Assert.That(actualAccount.Id, Is.EqualTo(_account.Id));
             Assert.That(actualAccount.Description, Is.EqualTo(_account.Description));
             Assert.That(actualAccount.Status, Is.EqualTo(_account.Status));
+        });
+    }
+
+    [Test]
+    public async Task UpdateAccountAsync_Should_Return_Error_From_Manager()
+    {
+        // Arrange
+        var accountUpdateDto = new AccountUpdateDto();
+        _mockAccountManager.Setup(m => m.UpdateAccountAsync(It.IsAny<Guid>(), It.IsAny<AccountUpdateDto>())).ReturnsAsync(_callError);
+
+        // Act & Assert Exception
+        var response = await _httpClient.PatchAsJsonAsync($"/api/accounts/{_account.Id}", accountUpdateDto);
+        var ex = Assert.Throws<HttpRequestException>(() => response.EnsureSuccessStatusCode());
+        var error = await response.Content.ReadFromJsonAsync<ErrorDto>();
+
+        // Assert
+        Assert.Multiple(() =>
+        {
+            Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0001.ToString()));
+            Assert.That(error.Message, Is.EqualTo("A resource with this id could not be found."));
         });
     }
 

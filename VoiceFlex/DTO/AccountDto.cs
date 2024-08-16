@@ -2,7 +2,7 @@
 
 namespace VoiceFlex.DTO;
 
-public class AccountDto
+public class AccountDto : ICallResult
 {
     public Guid Id { get; set; }
 

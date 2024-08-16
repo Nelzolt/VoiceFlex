@@ -35,12 +35,7 @@ public static class AccountApiEndpoints
     /// <param name="id">Account id</param>
     private static async Task<IResult> GetAccountWithPhoneNumbersAsync(
         Guid id, IAccountManager accountManager, IErrorManager errorManager)
-    {
-        var accountDto = await accountManager.GetAccountWithPhoneNumbersAsync(id);
-        return accountDto is null
-            ? errorManager.Error(ErrorCodes.VOICEFLEX_0001)
-            : Results.Ok(accountDto);
-    }
+        => errorManager.ErrorOrOk(await accountManager.GetAccountWithPhoneNumbersAsync(id));
 
     /// <summary>
     /// Set an account to active (1) or suspended (0).

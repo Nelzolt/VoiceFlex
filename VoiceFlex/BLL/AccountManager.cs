@@ -1,5 +1,4 @@
 ﻿using VoiceFlex.DAL;
-using VoiceFlex.Data;
 using VoiceFlex.DTO;
 using VoiceFlex.Models;
 
@@ -8,7 +7,7 @@ namespace VoiceFlex.BLL;
 public interface IAccountManager
 {
     Task<ICallResult> CreateAccountAsync(AccountDto account);
-    Task<AccountDto> GetAccountWithPhoneNumbersAsync(Guid id);
+    Task<ICallResult> GetAccountWithPhoneNumbersAsync(Guid id);
     Task<ICallResult> UpdateAccountAsync(Guid id, AccountUpdateDto accountUpdateDto);
 }
 
@@ -32,7 +31,7 @@ public class AccountManager : IAccountManager
         return await _accountAccessor.CreateAsync(account);
     }
 
-    public async Task<AccountDto> GetAccountWithPhoneNumbersAsync(Guid id)
+    public async Task<ICallResult> GetAccountWithPhoneNumbersAsync(Guid id)
         => await _accountAccessor.GetAsync(id);
 
     public async Task<ICallResult> UpdateAccountAsync(Guid id, AccountUpdateDto accountUpdateDto)

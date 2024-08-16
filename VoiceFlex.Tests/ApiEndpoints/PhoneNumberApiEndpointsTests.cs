@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using System.Net.Http.Json;
 using VoiceFlex.BLL;
-using VoiceFlex.Data;
 using VoiceFlex.DTO;
 using VoiceFlex.Models;
 using VoiceFlex.Tests.TestHelpers;
@@ -19,6 +18,7 @@ public class PhoneNumberApiEndpointsTests
     private Mock<IPhoneNumberManager> _mockPhoneNumberManager;
     private PhoneNumberDto _expectedPhoneNumber;
     private PhoneNumber _phoneNumber;
+    private CallError _callError;
 
     [SetUp]
     public void SetUp()
@@ -41,6 +41,7 @@ public class PhoneNumberApiEndpointsTests
             Number = "0987654321",
             AccountId = Guid.NewGuid()
         };
+        _callError = new CallError(ErrorCodes.VOICEFLEX_0001);
     }
 
     [Test]
@@ -63,11 +64,10 @@ public class PhoneNumberApiEndpointsTests
     }
 
     [Test]
-    public async Task CreatePhoneNumberAsync_Returns_400_Error_If_Number_Has_Wrong_Length()
+    public async Task CreatePhoneNumberAsync_Should_Return_Error_From_Manager()
     {
         // Arrange
         var error = new CallError(ErrorCodes.VOICEFLEX_0002);
-        //_mockPhoneNumberValidator.Setup(m => m.Error(It.IsAny<PhoneNumberDto>(), out error)).Returns(true);
         _mockPhoneNumberManager.Setup(m => m.CreatePhoneNumberAsync(It.IsAny<PhoneNumberDto>())).ReturnsAsync(error);
 
         // Act
@@ -110,6 +110,26 @@ public class PhoneNumberApiEndpointsTests
     }
 
     [Test]
+    public async Task UpdatePhoneNumberAsync_Should_Return_Error_From_Manager()
+    {
+        // Arrange
+        var phoneNumberUpdateDto = new PhoneNumberUpdateDto();
+        _mockPhoneNumberManager.Setup(m => m.UpdatePhoneNumberAsync(It.IsAny<Guid>(), It.IsAny<PhoneNumberUpdateDto>())).ReturnsAsync(_callError);
+
+        // Act & Assert Exception
+        var response = await _httpClient.PatchAsJsonAsync($"/api/phoneNumbers/{_phoneNumber.Id}", phoneNumberUpdateDto);
+        var ex = Assert.Throws<HttpRequestException>(() => response.EnsureSuccessStatusCode());
+        var error = await response.Content.ReadFromJsonAsync<ErrorDto>();
+
+        // Assert
+        Assert.Multiple(() =>
+        {
+            Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0001.ToString()));
+            Assert.That(error.Message, Is.EqualTo("A resource with this id could not be found."));
+        });
+    }
+
+    [Test]
     public async Task DeletePhoneNumberAsync_Should_Call_PhoneNumberManager_DeletePhoneNumberAsync()
     {
         // Arrange
@@ -121,6 +141,26 @@ public class PhoneNumberApiEndpointsTests
 
         // Assert
         _mockPhoneNumberManager.Verify(m => m.DeletePhoneNumberAsync(It.Is<Guid>(p => p.Equals(phoneNumberId))), Times.Once);
+    }
+
+    [Test]
+    public async Task DeletePhoneNumberAsync_Should_Return_Error_From_Manager()
+    {
+        // Arrange
+        var phoneNumberId = Guid.NewGuid();
+        _mockPhoneNumberManager.Setup(m => m.DeletePhoneNumberAsync(It.IsAny<Guid>())).ReturnsAsync(_callError);
+
+        // Act & Assert Exception
+        var response = await _httpClient.DeleteAsync($"/api/phonenumbers/{phoneNumberId}");
+        var ex = Assert.Throws<HttpRequestException>(() => response.EnsureSuccessStatusCode());
+        var error = await response.Content.ReadFromJsonAsync<ErrorDto>();
+
+        // Assert
+        Assert.Multiple(() =>
+        {
+            Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0001.ToString()));
+            Assert.That(error.Message, Is.EqualTo("A resource with this id could not be found."));
+        });
     }
 
     [TearDown]

@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using VoiceFlex.Data;
 using VoiceFlex.DTO;
 
 namespace VoiceFlex.Models;

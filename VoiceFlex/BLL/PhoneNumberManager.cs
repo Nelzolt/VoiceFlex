@@ -1,5 +1,4 @@
 ﻿using VoiceFlex.DAL;
-using VoiceFlex.Data;
 using VoiceFlex.DTO;
 using VoiceFlex.Models;
 
@@ -39,7 +38,7 @@ public class PhoneNumberManager : IPhoneNumberManager
         var isAssignAttempt = phoneNumberUpdateDto.AccountId is not null;
         if (isAssignAttempt)
         {
-            var account = await _accountAccessor.GetAsync((Guid)phoneNumberUpdateDto.AccountId);
+            var account = await _accountAccessor.GetAsync((Guid)phoneNumberUpdateDto.AccountId) as AccountDto;
             if (account is null)
             {
                 return new CallError(ErrorCodes.VOICEFLEX_0005);

@@ -9,7 +9,7 @@ namespace VoiceFlex.DAL;
 public interface IAccountAccessor
 {
     Task<ICallResult> CreateAsync(AccountDto account);
-    Task<AccountDto> GetAsync(Guid id);
+    Task<ICallResult> GetAsync(Guid id);
     Task<ICallResult> SetActiveAsync(Guid id);
     Task<ICallResult> SetSuspendedAsync(Guid id);
 }
@@ -29,13 +29,18 @@ public class AccountAccessor : IAccountAccessor
         return dbAccount;
     }
 
-    public async Task<AccountDto> GetAsync(Guid id)
-        => await _dbContext.VOICEFLEX_Accounts
+    public async Task<ICallResult> GetAsync(Guid id)
+    {
+        var account = await _dbContext.VOICEFLEX_Accounts
             .AsNoTracking()
             .Where(a => a.Id.Equals(id))
             .Include(a => a.PhoneNumbers)
             .Select(a => new AccountDto(a.Id, a.Description, a.Status, a.PhoneNumbers))
             .FirstOrDefaultAsync();
+        return account is null
+            ? new CallError(ErrorCodes.VOICEFLEX_0001)
+            : account;
+    }
 
     public async Task<ICallResult> SetActiveAsync(Guid id)
     {

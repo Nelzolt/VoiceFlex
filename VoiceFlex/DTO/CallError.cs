@@ -1,6 +1,6 @@
 ﻿using VoiceFlex.BLL;
 
-namespace VoiceFlex.Data;
+namespace VoiceFlex.DTO;
 
 public class CallError : ICallResult
 {

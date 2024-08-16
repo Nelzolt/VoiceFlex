@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using VoiceFlex.BLL;
 using VoiceFlex.DAL;
 using VoiceFlex.Data;
 using VoiceFlex.DTO;
@@ -74,7 +75,7 @@ public class AccountAccessorTests
     public async Task GetAsync_Should_Return_Account_With_PhoneNumbers()
     {
         // Act
-        var actualAccount = await _accountAccessor.GetAsync(_accountId);
+        var actualAccount = await _accountAccessor.GetAsync(_accountId) as AccountDto;
         var actualPhoneNumbers = actualAccount.PhoneNumbers;
 
         // Assert - Mind that the result list must be sorted by number
@@ -89,6 +90,17 @@ public class AccountAccessorTests
             Assert.That(actualPhoneNumbers[1].Number, Is.EqualTo(_expectedPhoneNumbers[0].Number));
             Assert.That(actualPhoneNumbers[1].AccountId, Is.EqualTo(_expectedPhoneNumbers[0].AccountId));
         });
+    }
+
+    [Test]
+    public async Task GetAsync_Should_Return_Error_If_Account_With_This_Id_Is_Not_Found()
+    {
+        // Act
+        var error = await _accountAccessor.GetAsync(Guid.NewGuid()) as CallError;
+
+        // Assert
+        Assert.That(error, Is.Not.Null);
+        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0001));
     }
 
     [Test]
@@ -107,6 +119,17 @@ public class AccountAccessorTests
     }
 
     [Test]
+    public async Task SetActiveAsync_Should_Return_Error_If_Account_With_This_Id_Is_Not_Found()
+    {
+        // Act
+        var error = await _accountAccessor.SetActiveAsync(Guid.NewGuid()) as CallError;
+
+        // Assert
+        Assert.That(error, Is.Not.Null);
+        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0001));
+    }
+
+    [Test]
     public async Task SetSuspenedAsync_Should_Update_Account_In_Db_And_Unassign_PhoneNumbers_And_Return_Updated_Account()
     {
         // Act
@@ -120,6 +143,17 @@ public class AccountAccessorTests
             Assert.That(updatedAccount.Description, Is.EqualTo(_expectedAccount.Description));
             Assert.That(updatedAccount.PhoneNumbers.Count, Is.EqualTo(0));
         });
+    }
+
+    [Test]
+    public async Task SetSuspenedAsync_Should_Return_Error_If_Account_With_This_Id_Is_Not_Found()
+    {
+        // Act
+        var error = await _accountAccessor.SetSuspendedAsync(Guid.NewGuid()) as CallError;
+
+        // Assert
+        Assert.That(error, Is.Not.Null);
+        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0001));
     }
 
     [TearDown]
