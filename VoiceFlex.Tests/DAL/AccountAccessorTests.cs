@@ -95,7 +95,7 @@ public class AccountAccessorTests
     public async Task SetActiveAsync_Should_Update_Account_In_Db_And_Return_Updated_Account()
     {
         // Act
-        var updatedAccount = await _accountAccessor.SetActiveAsync(_suspendedAccount.Id);
+        var updatedAccount = await _accountAccessor.SetActiveAsync(_suspendedAccount.Id) as Account;
 
         // Assert
         Assert.Multiple(() =>
@@ -110,7 +110,7 @@ public class AccountAccessorTests
     public async Task SetSuspenedAsync_Should_Update_Account_In_Db_And_Unassign_PhoneNumbers_And_Return_Updated_Account()
     {
         // Act
-        var updatedAccount = await _accountAccessor.SetSuspendedAsync(_expectedAccount.Id);
+        var updatedAccount = await _accountAccessor.SetSuspendedAsync(_expectedAccount.Id) as Account;
 
         // Assert
         Assert.Multiple(() =>

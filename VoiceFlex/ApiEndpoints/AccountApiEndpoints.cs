@@ -55,10 +55,5 @@ public static class AccountApiEndpoints
     /// <param name="id">Account id</param>
     private static async Task<IResult> UpdateAccountAsync(
         Guid id, AccountUpdateDto accountUpdate, IAccountManager accountManager, IErrorManager errorManager)
-    {
-        var account = await accountManager.UpdateAccountAsync(id, accountUpdate);
-        return account is null
-            ? errorManager.Error(ErrorCodes.VOICEFLEX_0001)
-            : Results.Ok(account);
-    }
+        => errorManager.ErrorOrOk(await accountManager.UpdateAccountAsync(id, accountUpdate));
 }

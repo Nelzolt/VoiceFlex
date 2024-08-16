@@ -9,7 +9,7 @@ public interface IAccountManager
 {
     Task<ICallResult> CreateAccountAsync(AccountDto account);
     Task<AccountDto> GetAccountWithPhoneNumbersAsync(Guid id);
-    Task<Account> UpdateAccountAsync(Guid id, AccountUpdateDto accountUpdateDto);
+    Task<ICallResult> UpdateAccountAsync(Guid id, AccountUpdateDto accountUpdateDto);
 }
 
 public class AccountManager : IAccountManager
@@ -35,7 +35,7 @@ public class AccountManager : IAccountManager
     public async Task<AccountDto> GetAccountWithPhoneNumbersAsync(Guid id)
         => await _accountAccessor.GetAsync(id);
 
-    public async Task<Account> UpdateAccountAsync(Guid id, AccountUpdateDto accountUpdateDto)
+    public async Task<ICallResult> UpdateAccountAsync(Guid id, AccountUpdateDto accountUpdateDto)
         => accountUpdateDto.Status == AccountStatus.Active
             ? await _accountAccessor.SetActiveAsync(id)
             : await _accountAccessor.SetSuspendedAsync(id);
