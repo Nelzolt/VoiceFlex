@@ -54,24 +54,29 @@ public class AccountManagerTests
         Assert.That(actualAccount, Is.EqualTo(_expectedAccount));
     }
 
-    [Test]
-    public async Task UpdateAccountAsync_Should_Call_AccountAccessor_UpdateAsync_With_Correct_Parameters()
+    [TestCase(AccountStatus.Active)]
+    [TestCase(AccountStatus.Suspended)]
+    public async Task UpdateAccountAsync_Should_Call_AccountAccessor_SetActiveAsync_Or_SetSuspendedAsync_With_Correct_Parameters(AccountStatus accountStatus)
     {
         // Arrange
         var accountId = Guid.NewGuid();
-        var accountUpdateDto = new AccountUpdateDto();
+        var accountUpdateDto = new AccountUpdateDto { Status = accountStatus };
         _mockAccountAccessor
-            .Setup(accessor => accessor.UpdateAsync(It.IsAny<Guid>(), It.IsAny<AccountUpdateDto>()))
+            .Setup(accessor => accessor.SetActiveAsync(It.IsAny<Guid>()))
             .ReturnsAsync(_account);
 
         // Act
         var actualAccount = await _accountManager.UpdateAccountAsync(accountId, accountUpdateDto);
 
         // Assert
-        _mockAccountAccessor.Verify(accessor => accessor.UpdateAsync(
-            It.Is<Guid>(p => p.Equals(accountId)),
-            It.Is<AccountUpdateDto>(p => p.Equals(accountUpdateDto))),
-            Times.Once);
+        if (accountStatus == AccountStatus.Active)
+        {
+            _mockAccountAccessor.Verify(accessor => accessor.SetActiveAsync(It.Is<Guid>(p => p.Equals(accountId))), Times.Once);
+        }
+        else
+        {
+            _mockAccountAccessor.Verify(accessor => accessor.SetSuspendedAsync(It.Is<Guid>(p => p.Equals(accountId))), Times.Once);
+        }
         Assert.That(actualAccount, Is.EqualTo(_account));
     }
 }

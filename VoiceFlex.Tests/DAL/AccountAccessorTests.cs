@@ -11,6 +11,7 @@ public class AccountAccessorTests
     private ApplicationDbContext _dbContext;
     private AccountAccessor _accountAccessor;
     private Account _expectedAccount;
+    private Account _suspendedAccount;
     private AccountDto _newAccount;
     private List<PhoneNumber> _expectedPhoneNumbers;
     private Guid _accountId;
@@ -27,8 +28,15 @@ public class AccountAccessorTests
         _expectedAccount = new Account
         {
             Id = _accountId,
+            Description = "account",
             Status = AccountStatus.Active,
             PhoneNumbers = _expectedPhoneNumbers
+        };
+        _suspendedAccount = new Account
+        {
+            Id = Guid.NewGuid(),
+            Description = "suspended",
+            Status = AccountStatus.Suspended
         };
         _newAccount = new AccountDto
         {
@@ -39,6 +47,7 @@ public class AccountAccessorTests
         _dbContext = new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(databaseName: "TestDatabase").Options);
         _dbContext.VOICEFLEX_Accounts.Add(_expectedAccount);
+        _dbContext.VOICEFLEX_Accounts.Add(_suspendedAccount);
         _dbContext.SaveChanges();
 
         _accountAccessor = new AccountAccessor(_dbContext);
@@ -83,34 +92,33 @@ public class AccountAccessorTests
     }
 
     [Test]
-    public async Task UpdateAsync_Should_Update_Account_In_Db_And_Return_Updated_Account()
+    public async Task SetActiveAsync_Should_Update_Account_In_Db_And_Return_Updated_Account()
     {
-        // Arrange
-        var accountUpdateDto = new AccountUpdateDto { Status = AccountStatus.Suspended };
-
         // Act
-        var updatedAccount = await _accountAccessor.UpdateAsync(_expectedAccount.Id, accountUpdateDto);
+        var updatedAccount = await _accountAccessor.SetActiveAsync(_suspendedAccount.Id);
 
         // Assert
         Assert.Multiple(() =>
         {
-            Assert.That(updatedAccount.Id, Is.EqualTo(_expectedAccount.Id));
-            Assert.That(updatedAccount.Status, Is.EqualTo(accountUpdateDto.Status));
-            Assert.That(updatedAccount.Description, Is.EqualTo(_expectedAccount.Description));
+            Assert.That(updatedAccount.Id, Is.EqualTo(_suspendedAccount.Id));
+            Assert.That(updatedAccount.Status, Is.EqualTo(AccountStatus.Active));
+            Assert.That(updatedAccount.Description, Is.EqualTo(_suspendedAccount.Description));
         });
+    }
 
-        // Arrange
-        accountUpdateDto.Status = AccountStatus.Active;
-
+    [Test]
+    public async Task SetSuspenedAsync_Should_Update_Account_In_Db_And_Unassign_PhoneNumbers_And_Return_Updated_Account()
+    {
         // Act
-        updatedAccount = await _accountAccessor.UpdateAsync(_expectedAccount.Id, accountUpdateDto);
+        var updatedAccount = await _accountAccessor.SetSuspendedAsync(_expectedAccount.Id);
 
         // Assert
         Assert.Multiple(() =>
         {
             Assert.That(updatedAccount.Id, Is.EqualTo(_expectedAccount.Id));
-            Assert.That(updatedAccount.Status, Is.EqualTo(accountUpdateDto.Status));
+            Assert.That(updatedAccount.Status, Is.EqualTo(AccountStatus.Suspended));
             Assert.That(updatedAccount.Description, Is.EqualTo(_expectedAccount.Description));
+            Assert.That(updatedAccount.PhoneNumbers.Count, Is.EqualTo(0));
         });
     }
 

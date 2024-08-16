@@ -9,7 +9,8 @@ public interface IAccountAccessor
 {
     Task<AccountDto> CreateAsync(AccountDto account);
     Task<AccountDto> GetAsync(Guid id);
-    Task<Account> UpdateAsync(Guid id, AccountUpdateDto accountUpdate);
+    Task<Account> SetActiveAsync(Guid id);
+    Task<Account> SetSuspendedAsync(Guid id);
 }
 
 public class AccountAccessor : IAccountAccessor
@@ -36,10 +37,25 @@ public class AccountAccessor : IAccountAccessor
             .Select(a => new AccountDto(a.Id, a.Description, a.Status, a.PhoneNumbers))
             .FirstOrDefaultAsync();
 
-    public async Task<Account> UpdateAsync(Guid id, AccountUpdateDto accountUpdate)
+    public async Task<Account> SetActiveAsync(Guid id)
     {
         var dbAccount = await _dbContext.VOICEFLEX_Accounts.FindAsync(id);
-        dbAccount.Status = accountUpdate.Status;
+        dbAccount.Status = AccountStatus.Active;
+        await _dbContext.SaveChangesAsync();
+        return dbAccount;
+    }
+
+    public async Task<Account> SetSuspendedAsync(Guid id)
+    {
+        var dbAccount = await _dbContext.VOICEFLEX_Accounts
+            .Where(a => a.Id.Equals(id))
+            .Include(a => a.PhoneNumbers)
+            .FirstOrDefaultAsync();
+        dbAccount.Status = AccountStatus.Suspended;
+        foreach (var phoneNumber in dbAccount.PhoneNumbers)
+        {
+            phoneNumber.AccountId = null;
+        }
         await _dbContext.SaveChangesAsync();
         return dbAccount;
     }

@@ -25,5 +25,7 @@ public class AccountManager : IAccountManager
         => await _accountAccessor.GetAsync(id);
 
     public async Task<Account> UpdateAccountAsync(Guid id, AccountUpdateDto accountUpdateDto)
-        => await _accountAccessor.UpdateAsync(id, accountUpdateDto);
+        => accountUpdateDto.Status == AccountStatus.Active
+            ? await _accountAccessor.SetActiveAsync(id)
+            : await _accountAccessor.SetSuspendedAsync(id);
 }
