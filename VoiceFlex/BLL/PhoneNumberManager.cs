@@ -40,6 +40,10 @@ public class PhoneNumberManager : IPhoneNumberManager
         if (isAssignAttempt)
         {
             var account = await _accountAccessor.GetAsync((Guid)phoneNumberUpdateDto.AccountId);
+            if (account is null)
+            {
+                return new CallError(ErrorCodes.VOICEFLEX_0005);
+            }
             if (account.Status == AccountStatus.Suspended)
             {
                 return new CallError(ErrorCodes.VOICEFLEX_0004);

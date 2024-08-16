@@ -123,6 +123,25 @@ public class PhoneNumberManagerTests
     }
 
     [Test]
+    public async Task UpdatePhoneNumberAsync_With_Invalid_AccountId_Should_Return_Error()
+    {
+        // Arrange
+        AccountDto nullAccount = null;
+        var phoneNumberId = Guid.NewGuid();
+        var phoneNumberUpdateDto = new PhoneNumberUpdateDto { AccountId = Guid.NewGuid() };
+        _mockAccountAccessor
+            .Setup(accessor => accessor.GetAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(nullAccount);
+
+        // Act
+        var error = await _phoneNumberManager.UpdatePhoneNumberAsync(phoneNumberId, phoneNumberUpdateDto) as CallError;
+
+        // Assert
+        Assert.That(error, Is.Not.Null);
+        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0005));
+    }
+
+    [Test]
     public async Task DeletePhoneNumberAsync_Should_Call_PhoneNumberAccessor_DeleteAsync_With_Correct_Parameters()
     {
         // Arrange
