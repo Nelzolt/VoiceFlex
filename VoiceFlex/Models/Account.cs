@@ -1,9 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using VoiceFlex.Data;
 using VoiceFlex.DTO;
 
 namespace VoiceFlex.Models;
 
-public class Account
+public class Account : ICallResult
 {
     public Guid Id { get; set; }
 

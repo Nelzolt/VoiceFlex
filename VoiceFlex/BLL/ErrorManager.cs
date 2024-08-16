@@ -1,7 +1,7 @@
 ﻿using VoiceFlex.Data;
 using VoiceFlex.DTO;
 
-namespace VoiceFlex.Helpers;
+namespace VoiceFlex.BLL;
 
 public interface IErrorManager
 {
@@ -29,7 +29,7 @@ public class ErrorManager : IErrorManager
     }
 
     public IResult ErrorOrOk(ICallResult callResult)
-        => (callResult is CallError error) ? Error(error.Code) : Results.Ok(callResult);
+        => callResult is CallError error ? Error(error.Code) : Results.Ok(callResult);
 }
 
 public enum ErrorCodes

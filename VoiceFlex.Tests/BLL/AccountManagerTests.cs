@@ -8,6 +8,7 @@ namespace VoiceFlex.Tests.BLL;
 
 public class AccountManagerTests
 {
+    private Mock<IAccountValidator> _mockAccountValidator;
     private Mock<IAccountAccessor> _mockAccountAccessor;
     private AccountManager _accountManager;
     private AccountDto _expectedAccount;
@@ -16,25 +17,42 @@ public class AccountManagerTests
     [SetUp]
     public void SetUp()
     {
+        _mockAccountValidator = new Mock<IAccountValidator>();
         _mockAccountAccessor = new Mock<IAccountAccessor>();
-        _accountManager = new AccountManager(_mockAccountAccessor.Object);
+        _accountManager = new AccountManager(_mockAccountValidator.Object, _mockAccountAccessor.Object);
         _expectedAccount = new AccountDto();
     }
 
     [Test]
-    public async Task CreateAccountAsync_Should_Call_AccountAccessor_CreateAsync_And_Return_NewAccount()
+    public async Task CreateAccountAsync_Should_Call_AccountAccessor_CreateAsync_With_Correct_Parameters()
     {
         // Arrange
         _mockAccountAccessor
             .Setup(accessor => accessor.CreateAsync(It.IsAny<AccountDto>()))
-            .ReturnsAsync(_expectedAccount);
+            .ReturnsAsync(_account);
 
         // Act
         var actualAccount = await _accountManager.CreateAccountAsync(_expectedAccount);
 
         // Assert
         _mockAccountAccessor.Verify(accessor => accessor.CreateAsync(It.Is<AccountDto>(p => p.Equals(_expectedAccount))), Times.Once);
-        Assert.That(actualAccount, Is.EqualTo(_expectedAccount));
+        Assert.That(actualAccount, Is.EqualTo(_account));
+    }
+
+    [Test]
+    public async Task CreateAccountAsync_Should_Call_AccountValidator_Error_With_Correct_Parameters()
+    {
+        // Arrange
+        _mockAccountAccessor
+            .Setup(accessor => accessor.CreateAsync(It.IsAny<AccountDto>()))
+            .ReturnsAsync(_account);
+
+        // Act
+        var actualAccount = await _accountManager.CreateAccountAsync(_expectedAccount);
+
+        // Assert
+        _mockAccountAccessor.Verify(accessor => accessor.CreateAsync(It.Is<AccountDto>(p => p.Equals(_expectedAccount))), Times.Once);
+        Assert.That(actualAccount, Is.EqualTo(_account));
     }
 
     [Test]

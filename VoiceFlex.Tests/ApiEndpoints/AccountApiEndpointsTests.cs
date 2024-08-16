@@ -5,7 +5,6 @@ using Moq;
 using System.Net.Http.Json;
 using VoiceFlex.BLL;
 using VoiceFlex.DTO;
-using VoiceFlex.Helpers;
 using VoiceFlex.Models;
 using VoiceFlex.Tests.TestHelpers;
 
@@ -55,23 +54,23 @@ public class AccountApiEndpointsTests
     public async Task CreateAccountAsync_Should_Call_AccountManager_CreateAccountAsync_And_Return_NewAccount()
     {
         // Arrange
-        _mockAccountManager.Setup(m => m.CreateAccountAsync(It.IsAny<AccountDto>())).ReturnsAsync(_expectedAccount);
+        _mockAccountManager.Setup(m => m.CreateAccountAsync(It.IsAny<AccountDto>())).ReturnsAsync(_account);
 
         // Act
-        var response = await _httpClient.PostAsJsonAsync($"/api/accounts", _expectedAccount);
+        var response = await _httpClient.PostAsJsonAsync($"/api/accounts", _account);
         response.EnsureSuccessStatusCode();
 
         var actualAccount = await response.Content.ReadFromJsonAsync<AccountDto>();
 
         // Assert
         _mockAccountManager.Verify(m => m.CreateAccountAsync(It.Is<AccountDto>(
-            p => p.Description.Equals(_expectedAccount.Description)
-            && p.Status.Equals(_expectedAccount.Status))),
+            p => p.Description.Equals(_account.Description)
+            && p.Status.Equals(_account.Status))),
             Times.Once);
         Assert.Multiple(() =>
         {
-            Assert.That(actualAccount.Description, Is.EqualTo(_expectedAccount.Description));
-            Assert.That(actualAccount.Status, Is.EqualTo(_expectedAccount.Status));
+            Assert.That(actualAccount.Description, Is.EqualTo(_account.Description));
+            Assert.That(actualAccount.Status, Is.EqualTo(_account.Status));
         });
     }
 

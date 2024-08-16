@@ -1,7 +1,6 @@
 ﻿using VoiceFlex.BLL;
 using VoiceFlex.Data;
 using VoiceFlex.DTO;
-using VoiceFlex.Helpers;
 
 namespace VoiceFlex.Tests.BLL;
 
@@ -31,8 +30,11 @@ public class PhoneNumberValidatorTests
         var hasError = _phoneNumberValidator.Error(_testPhoneNumber, out _error);
 
         // Assert
-        Assert.That(hasError, Is.True);
-        Assert.That(_error, Is.Not.Null);
-        Assert.That(_error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0002));
+        Assert.Multiple(() =>
+        {
+            Assert.That(hasError, Is.True);
+            Assert.That(_error, Is.Not.Null);
+            Assert.That(_error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0002));
+        });
     }
 }

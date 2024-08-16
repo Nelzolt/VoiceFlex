@@ -1,6 +1,5 @@
 ﻿using VoiceFlex.BLL;
 using VoiceFlex.DTO;
-using VoiceFlex.Helpers;
 
 namespace VoiceFlex.ApiEndpoints;
 
@@ -26,8 +25,9 @@ public static class AccountApiEndpoints
     ///         "status": 1
     ///     }
     /// </remarks>
-    private static async Task<AccountDto> CreateAccountAsync(AccountDto account, IAccountManager accountManager)
-        => await accountManager.CreateAccountAsync(account);
+    private static async Task<IResult> CreateAccountAsync(
+        AccountDto account, IAccountManager accountManager, IErrorManager errorManager)
+        => errorManager.ErrorOrOk(await accountManager.CreateAccountAsync(account));
 
     /// <summary>
     /// Get all phone numbers for an account.

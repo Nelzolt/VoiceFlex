@@ -7,7 +7,7 @@ namespace VoiceFlex.DAL;
 
 public interface IAccountAccessor
 {
-    Task<AccountDto> CreateAsync(AccountDto account);
+    Task<ICallResult> CreateAsync(AccountDto account);
     Task<AccountDto> GetAsync(Guid id);
     Task<Account> SetActiveAsync(Guid id);
     Task<Account> SetSuspendedAsync(Guid id);
@@ -20,13 +20,12 @@ public class AccountAccessor : IAccountAccessor
     public AccountAccessor(ApplicationDbContext dbContext)
         => _dbContext = dbContext;
 
-    public async Task<AccountDto> CreateAsync(AccountDto account)
+    public async Task<ICallResult> CreateAsync(AccountDto account)
     {
         var dbAccount = new Account(account);
         await _dbContext.VOICEFLEX_Accounts.AddAsync(dbAccount);
         await _dbContext.SaveChangesAsync();
-        account.Id = dbAccount.Id;
-        return account;
+        return dbAccount;
     }
 
     public async Task<AccountDto> GetAsync(Guid id)

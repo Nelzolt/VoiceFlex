@@ -57,7 +57,7 @@ public class AccountAccessorTests
     public async Task CreateAsync_Should_Add_Account_To_Db_And_Return_Account_With_Id()
     {
         // Act
-        var actualAccount = await _accountAccessor.CreateAsync(_newAccount);
+        var actualAccount = await _accountAccessor.CreateAsync(_newAccount) as Account;
 
         // Assert
         Assert.Multiple(() =>
