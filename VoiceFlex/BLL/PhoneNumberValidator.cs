@@ -6,9 +6,9 @@ namespace VoiceFlex.BLL;
 
 public interface IPhoneNumberValidator
 {
-    Task<ICallResult> NewPhoneNumberError(PhoneNumberDto phoneNumber);
-    Task<ICallResult> AssignPhoneNumberError(PhoneNumber phoneNumber, PhoneNumberUpdateDto phoneNumberUpdate);
-    ICallResult UnassignPhoneNumberError(PhoneNumber phoneNumber);
+    Task<CallError> NewPhoneNumberErrorAsync(PhoneNumberDto phoneNumber);
+    Task<CallError> AssignPhoneNumberError(PhoneNumber phoneNumber, PhoneNumberUpdateDto phoneNumberUpdate);
+    CallError UnassignPhoneNumberError(PhoneNumber phoneNumber);
 }
 
 public class PhoneNumberValidator : IPhoneNumberValidator
@@ -22,7 +22,7 @@ public class PhoneNumberValidator : IPhoneNumberValidator
         => (_phoneNumberAccessor, _accountAccessor)
             = (phoneNumberAccessor, accountAccessor);
 
-    public async Task<ICallResult> NewPhoneNumberError(PhoneNumberDto phoneNumber)
+    public async Task<CallError> NewPhoneNumberErrorAsync(PhoneNumberDto phoneNumber)
     {
         // The number must have at least 1 and not more than 11 characters
         var error = phoneNumber.Number is null
@@ -38,7 +38,7 @@ public class PhoneNumberValidator : IPhoneNumberValidator
             : null;
     }
 
-    public async Task<ICallResult> AssignPhoneNumberError(PhoneNumber phoneNumber, PhoneNumberUpdateDto phoneNumberUpdate)
+    public async Task<CallError> AssignPhoneNumberError(PhoneNumber phoneNumber, PhoneNumberUpdateDto phoneNumberUpdate)
     {
         // A phone number with this id could not be found
         if (phoneNumber is null)
@@ -68,6 +68,8 @@ public class PhoneNumberValidator : IPhoneNumberValidator
         return null;
     }
 
-    public ICallResult UnassignPhoneNumberError(PhoneNumber phoneNumber)
-        => (ICallResult)phoneNumber ?? new CallError(ErrorCodes.VOICEFLEX_0000);
+    public CallError UnassignPhoneNumberError(PhoneNumber phoneNumber)
+        => phoneNumber is null
+            ? new CallError(ErrorCodes.VOICEFLEX_0000)
+            : null;
 }

@@ -26,12 +26,11 @@ public class AccountValidatorTests
         _testAccount.Description = description;
 
         // Act
-        var hasError = _accountValidator.Error(_testAccount, out _error);
+        var _error = _accountValidator.NewAccountError(_testAccount) as CallError;
 
         // Assert
         Assert.Multiple(() =>
         {
-            Assert.That(hasError, Is.True);
             Assert.That(_error, Is.Not.Null);
             Assert.That(_error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0005));
         });
@@ -45,9 +44,9 @@ public class AccountValidatorTests
         _testAccount.Description = description;
 
         // Act
-        var hasError = _accountValidator.Error(_testAccount, out _error);
+        var error = _accountValidator.NewAccountError(_testAccount);
 
         // Assert
-        Assert.That(hasError, Is.False);
+        Assert.That(error, Is.Null);
     }
 }

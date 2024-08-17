@@ -24,7 +24,7 @@ public class PhoneNumberManager : IPhoneNumberManager
             = (phoneNumberValidator, phoneNumberAccessor, accountAccessor);
 
     public async Task<ICallResult> CreatePhoneNumberAsync(PhoneNumberDto phoneNumber)
-        => await _phoneNumberValidator.NewPhoneNumberError(phoneNumber)
+        => await _phoneNumberValidator.NewPhoneNumberErrorAsync(phoneNumber) as ICallResult
             ?? await _phoneNumberAccessor.CreateAsync(phoneNumber);
 
     public async Task<ICallResult> AssignUnassignPhoneNumberAsync(Guid id, PhoneNumberUpdateDto phoneNumberUpdate)
@@ -35,7 +35,7 @@ public class PhoneNumberManager : IPhoneNumberManager
         var error = isAssignAttempt
             ? await _phoneNumberValidator.AssignPhoneNumberError(dbPhoneNumber, phoneNumberUpdate)
             : _phoneNumberValidator.UnassignPhoneNumberError(dbPhoneNumber);
-        return error
+        return error as ICallResult
             ?? await _phoneNumberAccessor.AssignUnassignAsync(dbPhoneNumber, phoneNumberUpdate.AccountId);
     }
 
