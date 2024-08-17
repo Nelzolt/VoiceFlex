@@ -14,6 +14,8 @@ public class PhoneNumberManagerTests
     private PhoneNumberManager _phoneNumberManager;
     private PhoneNumberDto _expectedPhoneNumber;
     private PhoneNumber _phoneNumber;
+    private Guid _accountId;
+    private AccountDto _account;
     private Guid _suspendedAccountId;
     private AccountDto _suspendedAccount;
 
@@ -25,6 +27,12 @@ public class PhoneNumberManagerTests
         _mockAccountAccessor = new Mock<IAccountAccessor>();
         _phoneNumberManager = new PhoneNumberManager(_mockPhoneNumberValidator.Object, _mockPhoneNumberAccessor.Object, _mockAccountAccessor.Object);
         _expectedPhoneNumber = new PhoneNumberDto();
+        _accountId = Guid.NewGuid();
+        _account = new AccountDto
+        {
+            Id = _accountId,
+            Status = AccountStatus.Active
+        };
         _suspendedAccountId = Guid.NewGuid();
         _suspendedAccount = new AccountDto
         {
@@ -53,37 +61,17 @@ public class PhoneNumberManagerTests
     public async Task CreatePhoneNumberAsync_Should_Call_PhoneNumberValidator_Error_With_Correct_Parameters()
     {
         // Arrange
-        _mockPhoneNumberAccessor
-            .Setup(accessor => accessor.CreateAsync(It.IsAny<PhoneNumberDto>()))
-            .ReturnsAsync(_phoneNumber);
+        var mockError = new CallError(ErrorCodes.VOICEFLEX_0002);
+        _mockPhoneNumberValidator
+            .Setup(v => v.Error(It.IsAny<PhoneNumberDto>(), out mockError))
+            .Returns(true);
 
         // Act
-        var actualPhoneNumber = await _phoneNumberManager.CreatePhoneNumberAsync(_expectedPhoneNumber);
+        var error = await _phoneNumberManager.CreatePhoneNumberAsync(_expectedPhoneNumber) as CallError;
 
         // Assert
-        _mockPhoneNumberAccessor.Verify(accessor => accessor.CreateAsync(It.Is<PhoneNumberDto>(p => p.Equals(_expectedPhoneNumber))), Times.Once);
-        Assert.That(actualPhoneNumber, Is.EqualTo(_phoneNumber));
-    }
-
-    [Test]
-    public async Task UpdatePhoneNumberAsync_Should_Call_PhoneNumberAccessor_UpdateAsync_With_Correct_Parameters()
-    {
-        // Arrange
-        var phoneNumberId = Guid.NewGuid();
-        var phoneNumberUpdateDto = new PhoneNumberUpdateDto();
-        _mockPhoneNumberAccessor
-            .Setup(accessor => accessor.UpdateAsync(It.IsAny<Guid>(), It.IsAny<PhoneNumberUpdateDto>()))
-            .ReturnsAsync(_phoneNumber);
-
-        // Act
-        var actualPhoneNumber = await _phoneNumberManager.UpdatePhoneNumberAsync(phoneNumberId, phoneNumberUpdateDto);
-
-        // Assert
-        _mockPhoneNumberAccessor.Verify(accessor => accessor.UpdateAsync(
-            It.Is<Guid>(p => p.Equals(phoneNumberId)),
-            It.Is<PhoneNumberUpdateDto>(p => p.Equals(phoneNumberUpdateDto))),
-            Times.Once);
-        Assert.That(actualPhoneNumber, Is.EqualTo(_phoneNumber));
+        Assert.That(error, Is.Not.Null);
+        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0002));
     }
 
     [Test]
@@ -91,16 +79,38 @@ public class PhoneNumberManagerTests
     {
         // Arrange
         var phoneNumberId = Guid.NewGuid();
-        var phoneNumberUpdateDto = new PhoneNumberUpdateDto { AccountId = _suspendedAccountId };
+        var phoneNumberUpdateDto = new PhoneNumberUpdateDto { AccountId = _accountId };
         _mockAccountAccessor
             .Setup(accessor => accessor.GetAsync(It.IsAny<Guid>()))
-            .ReturnsAsync(_suspendedAccount);
+            .ReturnsAsync(_account);
+        _mockPhoneNumberAccessor
+            .Setup(accessor => accessor.UpdateAsync(It.IsAny<Guid>(), It.IsAny<PhoneNumberUpdateDto>()))
+            .ReturnsAsync(_phoneNumber);
 
         // Act
-        await _phoneNumberManager.UpdatePhoneNumberAsync(phoneNumberId, phoneNumberUpdateDto);
+        var phoneNumber = await _phoneNumberManager.UpdatePhoneNumberAsync(phoneNumberId, phoneNumberUpdateDto);
 
         // Assert
-        _mockAccountAccessor.Verify(accessor => accessor.GetAsync(It.Is<Guid>(p => p.Equals(_suspendedAccountId))), Times.Once);
+        _mockAccountAccessor.Verify(accessor => accessor.GetAsync(It.Is<Guid>(p => p.Equals(_accountId))), Times.Once);
+    }
+
+    [Test]
+    public async Task UpdatePhoneNumberAsync_With_Invalid_AccountId_Should_Return_Error()
+    {
+        // Arrange
+        AccountDto nullAccount = null;
+        var phoneNumberId = Guid.NewGuid();
+        var phoneNumberUpdateDto = new PhoneNumberUpdateDto { AccountId = Guid.NewGuid() };
+        _mockAccountAccessor
+            .Setup(accessor => accessor.GetAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(nullAccount);
+
+        // Act
+        var error = await _phoneNumberManager.UpdatePhoneNumberAsync(phoneNumberId, phoneNumberUpdateDto) as CallError;
+
+        // Assert
+        Assert.That(error, Is.Not.Null);
+        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0005));
     }
 
     [Test]
@@ -122,22 +132,24 @@ public class PhoneNumberManagerTests
     }
 
     [Test]
-    public async Task UpdatePhoneNumberAsync_With_Invalid_AccountId_Should_Return_Error()
+    public async Task UpdatePhoneNumberAsync_Should_Call_PhoneNumberAccessor_UpdateAsync_With_Correct_Parameters()
     {
         // Arrange
-        AccountDto nullAccount = null;
         var phoneNumberId = Guid.NewGuid();
-        var phoneNumberUpdateDto = new PhoneNumberUpdateDto { AccountId = Guid.NewGuid() };
-        _mockAccountAccessor
-            .Setup(accessor => accessor.GetAsync(It.IsAny<Guid>()))
-            .ReturnsAsync(nullAccount);
+        var phoneNumberUpdateDto = new PhoneNumberUpdateDto();
+        _mockPhoneNumberAccessor
+            .Setup(accessor => accessor.UpdateAsync(It.IsAny<Guid>(), It.IsAny<PhoneNumberUpdateDto>()))
+            .ReturnsAsync(_phoneNumber);
 
         // Act
-        var error = await _phoneNumberManager.UpdatePhoneNumberAsync(phoneNumberId, phoneNumberUpdateDto) as CallError;
+        var actualPhoneNumber = await _phoneNumberManager.UpdatePhoneNumberAsync(phoneNumberId, phoneNumberUpdateDto);
 
         // Assert
-        Assert.That(error, Is.Not.Null);
-        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0005));
+        _mockPhoneNumberAccessor.Verify(accessor => accessor.UpdateAsync(
+            It.Is<Guid>(p => p.Equals(phoneNumberId)),
+            It.Is<PhoneNumberUpdateDto>(p => p.Equals(phoneNumberUpdateDto))),
+            Times.Once);
+        Assert.That(actualPhoneNumber, Is.EqualTo(_phoneNumber));
     }
 
     [Test]

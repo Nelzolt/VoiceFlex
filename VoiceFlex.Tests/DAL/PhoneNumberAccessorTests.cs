@@ -138,6 +138,20 @@ public class PhoneNumberAccessorTests
     }
 
     [Test]
+    public async Task UpdateAsync_Should_Return_Error_If_Account_With_This_Id_Is_Not_Found()
+    {
+        // Arrange
+        var phoneNumberUpdateDto = new PhoneNumberUpdateDto { AccountId = _accountId };
+
+        // Act
+        var error = await _phoneNumberAccessor.UpdateAsync(Guid.NewGuid(), phoneNumberUpdateDto) as CallError;
+
+        // Assert
+        Assert.That(error, Is.Not.Null);
+        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0001));
+    }
+
+    [Test]
     public async Task UpdateAsync_Should_Not_Assign_PhoneNumber_In_Db_And_Return_Error_If_Already_Assigned()
     {
         // Arrange
@@ -167,6 +181,17 @@ public class PhoneNumberAccessorTests
         // Assert
         var deletedPhoneNumber = await _dbContext.VOICEFLEX_PhoneNumbers.FindAsync(_phoneNumberToDelete.Id);
         Assert.That(deletedPhoneNumber, Is.Null);
+    }
+
+    [Test]
+    public async Task DeleteAsync_Should_Return_Error_If_Account_With_This_Id_Is_Not_Found()
+    {
+        // Act
+        var error = await _phoneNumberAccessor.DeleteAsync(Guid.NewGuid()) as CallError;
+
+        // Assert
+        Assert.That(error, Is.Not.Null);
+        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0001));
     }
 
     [TearDown]

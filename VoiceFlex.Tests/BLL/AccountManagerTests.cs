@@ -3,6 +3,7 @@ using VoiceFlex.BLL;
 using VoiceFlex.DAL;
 using VoiceFlex.DTO;
 using VoiceFlex.Models;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace VoiceFlex.Tests.BLL;
 
@@ -43,16 +44,17 @@ public class AccountManagerTests
     public async Task CreateAccountAsync_Should_Call_AccountValidator_Error_With_Correct_Parameters()
     {
         // Arrange
-        _mockAccountAccessor
-            .Setup(accessor => accessor.CreateAsync(It.IsAny<AccountDto>()))
-            .ReturnsAsync(_account);
+        var mockError = new CallError(ErrorCodes.VOICEFLEX_0006);
+        _mockAccountValidator
+            .Setup(v => v.Error(It.IsAny<AccountDto>(), out mockError))
+            .Returns(true);
 
         // Act
-        var actualAccount = await _accountManager.CreateAccountAsync(_expectedAccount);
+        var error = await _accountManager.CreateAccountAsync(_expectedAccount) as CallError;
 
         // Assert
-        _mockAccountAccessor.Verify(accessor => accessor.CreateAsync(It.Is<AccountDto>(p => p.Equals(_expectedAccount))), Times.Once);
-        Assert.That(actualAccount, Is.EqualTo(_account));
+        Assert.That(error, Is.Not.Null);
+        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0006));
     }
 
     [Test]
