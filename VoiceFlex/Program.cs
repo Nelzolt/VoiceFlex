@@ -47,6 +47,8 @@ builder.Services.AddScoped<IPhoneNumberAccessor, PhoneNumberAccessor>();
 
 #endregion
 
+builder.Services.AddCors();
+
 builder.Build()
     .MapAccountApiEndpoints()
     .MapPhoneNumberApiEndpoints()

@@ -10,7 +10,13 @@ public static class ApiEndpoints
         app.MapGet("/", () => Results.Redirect("/swagger/index.html"));
         app.MapGet("/api", ServiceAlive);
 
-        app.UseHttpsRedirection()
+        app.UseCors(builder =>
+            {
+                builder.AllowAnyHeader();
+                builder.AllowAnyMethod();
+                builder.AllowAnyOrigin(); //corsBuilder.WithOrigins("http://localhost:56573"); // for a specific url.
+            })
+            .UseHttpsRedirection()
             .UseSwagger()
             .UseSwaggerUI();
 
