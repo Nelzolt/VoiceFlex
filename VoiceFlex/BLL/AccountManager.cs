@@ -23,19 +23,16 @@ public class AccountManager : IAccountManager
             = (accountAccessor, accountValidator);
 
     public async Task<ICallResult> CreateAccountAsync(AccountDto account)
-    {
-        if (_accountValidator.Error(account, out var callError))
-        {
-            return callError;
-        }
-        return await _accountAccessor.CreateAsync(account);
-    }
+        => _accountValidator.NewAccountError(account)
+            ?? await _accountAccessor.CreateAsync(account);
 
     public async Task<ICallResult> GetAccountWithPhoneNumbersAsync(Guid id)
-        => await _accountAccessor.GetAsync(id);
+        => await _accountAccessor.GetAsync(id)
+            ?? (ICallResult)new CallError(ErrorCodes.VOICEFLEX_0000);
 
     public async Task<ICallResult> UpdateAccountAsync(Guid id, AccountUpdateDto accountUpdateDto)
         => accountUpdateDto.Status == AccountStatus.Active
             ? await _accountAccessor.SetActiveAsync(id)
-            : await _accountAccessor.SetSuspendedAsync(id);
+            : await _accountAccessor.SetSuspendedAsync(id)
+            ?? (ICallResult)new CallError(ErrorCodes.VOICEFLEX_0000);
 }

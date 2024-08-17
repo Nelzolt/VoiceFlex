@@ -33,7 +33,7 @@ public class PhoneNumberValidatorTests
         {
             Assert.That(hasError, Is.True);
             Assert.That(_error, Is.Not.Null);
-            Assert.That(_error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0002));
+            Assert.That(_error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0001));
         });
     }
 

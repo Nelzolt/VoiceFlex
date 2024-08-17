@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using VoiceFlex.BLL;
 using VoiceFlex.Data;
 using VoiceFlex.DTO;
 using VoiceFlex.Models;
@@ -8,9 +7,11 @@ namespace VoiceFlex.DAL;
 
 public interface IPhoneNumberAccessor
 {
-    Task<ICallResult> CreateAsync(PhoneNumberDto phoneNumber);
-    Task<ICallResult> UpdateAsync(Guid id, PhoneNumberUpdateDto phoneNumberUpdate);
-    Task<ICallResult> DeleteAsync(Guid id);
+    Task<PhoneNumber> CreateAsync(PhoneNumberDto phoneNumber);
+    Task<PhoneNumber> GetAsync(Guid id);
+    Task<PhoneNumber> GetByNumberAsync(string number);
+    Task<PhoneNumber> AssignUnassignAsync(PhoneNumber phoneNumber, Guid? accountId);
+    Task<PhoneNumber> DeleteAsync(Guid id);
 }
 
 public class PhoneNumberAccessor : IPhoneNumberAccessor
@@ -20,53 +21,38 @@ public class PhoneNumberAccessor : IPhoneNumberAccessor
     public PhoneNumberAccessor(ApplicationDbContext dbContext)
         => _dbContext = dbContext;
 
-    public async Task<ICallResult> CreateAsync(PhoneNumberDto phoneNumber)
+    public async Task<PhoneNumber> CreateAsync(PhoneNumberDto phoneNumber)
     {
-        var duplicatePhoneNumber = await _dbContext.VOICEFLEX_PhoneNumbers
-            .AsNoTracking()
-            .Where(p => p.Number.Equals(phoneNumber.Number))
-            .FirstOrDefaultAsync();
-        if (duplicatePhoneNumber is not null)
-        {
-            return new CallError(ErrorCodes.VOICEFLEX_0007);
-        }
-
         var dbPhoneNumber = new PhoneNumber(phoneNumber);
         await _dbContext.VOICEFLEX_PhoneNumbers.AddAsync(dbPhoneNumber);
         await _dbContext.SaveChangesAsync();
         return dbPhoneNumber;
     }
 
-    public async Task<ICallResult> UpdateAsync(Guid id, PhoneNumberUpdateDto phoneNumberUpdate)
+    public async Task<PhoneNumber> GetAsync(Guid id)
+        => await _dbContext.VOICEFLEX_PhoneNumbers.FindAsync(id);
+
+    public async Task<PhoneNumber> GetByNumberAsync(string number)
+        => await _dbContext.VOICEFLEX_PhoneNumbers
+            .AsNoTracking()
+            .Where(p => p.Number.Equals(number))
+            .FirstOrDefaultAsync();
+
+    public async Task<PhoneNumber> AssignUnassignAsync(PhoneNumber phoneNumber, Guid? accountId)
     {
-        var dbPhoneNumber = await _dbContext.VOICEFLEX_PhoneNumbers.FindAsync(id);
-        if (dbPhoneNumber is null)
-        {
-            return new CallError(ErrorCodes.VOICEFLEX_0001);
-        }
-
-        var isAttemptToAssignAnAlreadyAssignedPhoneNumber =
-            dbPhoneNumber.AccountId is not null && phoneNumberUpdate.AccountId is not null;
-        if (isAttemptToAssignAnAlreadyAssignedPhoneNumber)
-        {
-            return new CallError(ErrorCodes.VOICEFLEX_0003);
-        }
-
-        dbPhoneNumber.AccountId = phoneNumberUpdate.AccountId;
+        phoneNumber.AccountId = accountId;
         await _dbContext.SaveChangesAsync();
-        return dbPhoneNumber;
+        return phoneNumber;
     }
 
-    public async Task<ICallResult> DeleteAsync(Guid id)
+    public async Task<PhoneNumber> DeleteAsync(Guid id)
     {
         var phoneNumber = await _dbContext.VOICEFLEX_PhoneNumbers.FindAsync(id);
-        if (phoneNumber is null)
+        if (phoneNumber is not null)
         {
-            return new CallError(ErrorCodes.VOICEFLEX_0001);
+            _dbContext.VOICEFLEX_PhoneNumbers.Remove(phoneNumber);
+            await _dbContext.SaveChangesAsync();
         }
-
-        _dbContext.VOICEFLEX_PhoneNumbers.Remove(phoneNumber);
-        await _dbContext.SaveChangesAsync();
-        return null;
+        return phoneNumber;
     }
 }

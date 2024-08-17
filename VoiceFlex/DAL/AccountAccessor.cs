@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using VoiceFlex.BLL;
 using VoiceFlex.Data;
 using VoiceFlex.DTO;
 using VoiceFlex.Models;
@@ -8,10 +7,10 @@ namespace VoiceFlex.DAL;
 
 public interface IAccountAccessor
 {
-    Task<ICallResult> CreateAsync(AccountDto account);
-    Task<ICallResult> GetAsync(Guid id);
-    Task<ICallResult> SetActiveAsync(Guid id);
-    Task<ICallResult> SetSuspendedAsync(Guid id);
+    Task<Account> CreateAsync(AccountDto account);
+    Task<AccountDto> GetAsync(Guid id);
+    Task<Account> SetActiveAsync(Guid id);
+    Task<Account> SetSuspendedAsync(Guid id);
 }
 
 public class AccountAccessor : IAccountAccessor
@@ -21,7 +20,7 @@ public class AccountAccessor : IAccountAccessor
     public AccountAccessor(ApplicationDbContext dbContext)
         => _dbContext = dbContext;
 
-    public async Task<ICallResult> CreateAsync(AccountDto account)
+    public async Task<Account> CreateAsync(AccountDto account)
     {
         var dbAccount = new Account(account);
         await _dbContext.VOICEFLEX_Accounts.AddAsync(dbAccount);
@@ -29,47 +28,40 @@ public class AccountAccessor : IAccountAccessor
         return dbAccount;
     }
 
-    public async Task<ICallResult> GetAsync(Guid id)
-    {
-        var account = await _dbContext.VOICEFLEX_Accounts
+    public async Task<AccountDto> GetAsync(Guid id)
+        => await _dbContext.VOICEFLEX_Accounts
             .AsNoTracking()
             .Where(a => a.Id.Equals(id))
             .Include(a => a.PhoneNumbers)
             .Select(a => new AccountDto(a.Id, a.Description, a.Status, a.PhoneNumbers))
             .FirstOrDefaultAsync();
-        return account is null
-            ? new CallError(ErrorCodes.VOICEFLEX_0001)
-            : account;
-    }
 
-    public async Task<ICallResult> SetActiveAsync(Guid id)
+    public async Task<Account> SetActiveAsync(Guid id)
     {
         var dbAccount = await _dbContext.VOICEFLEX_Accounts.FindAsync(id);
-        if (dbAccount is null)
+        if (dbAccount is not null)
         {
-            return new CallError(ErrorCodes.VOICEFLEX_0001);
+            dbAccount.Status = AccountStatus.Active;
+            await _dbContext.SaveChangesAsync();
         }
-        dbAccount.Status = AccountStatus.Active;
-        await _dbContext.SaveChangesAsync();
         return dbAccount;
     }
 
-    public async Task<ICallResult> SetSuspendedAsync(Guid id)
+    public async Task<Account> SetSuspendedAsync(Guid id)
     {
         var dbAccount = await _dbContext.VOICEFLEX_Accounts
             .Where(a => a.Id.Equals(id))
             .Include(a => a.PhoneNumbers)
             .FirstOrDefaultAsync();
-        if (dbAccount is null)
+        if (dbAccount is not null)
         {
-            return new CallError(ErrorCodes.VOICEFLEX_0001);
+            foreach (var phoneNumber in dbAccount.PhoneNumbers)
+            {
+                phoneNumber.AccountId = null;
+            }
+            dbAccount.Status = AccountStatus.Suspended;
+            await _dbContext.SaveChangesAsync();
         }
-        dbAccount.Status = AccountStatus.Suspended;
-        foreach (var phoneNumber in dbAccount.PhoneNumbers)
-        {
-            phoneNumber.AccountId = null;
-        }
-        await _dbContext.SaveChangesAsync();
         return dbAccount;
     }
 }

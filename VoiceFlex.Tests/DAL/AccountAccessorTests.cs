@@ -100,7 +100,7 @@ public class AccountAccessorTests
 
         // Assert
         Assert.That(error, Is.Not.Null);
-        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0001));
+        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0000));
     }
 
     [Test]
@@ -126,7 +126,7 @@ public class AccountAccessorTests
 
         // Assert
         Assert.That(error, Is.Not.Null);
-        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0001));
+        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0000));
     }
 
     [Test]
@@ -153,7 +153,7 @@ public class AccountAccessorTests
 
         // Assert
         Assert.That(error, Is.Not.Null);
-        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0001));
+        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0000));
     }
 
     [TearDown]

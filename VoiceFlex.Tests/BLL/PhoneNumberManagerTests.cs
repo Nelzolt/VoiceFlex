@@ -61,7 +61,7 @@ public class PhoneNumberManagerTests
     public async Task CreatePhoneNumberAsync_Should_Call_PhoneNumberValidator_Error_With_Correct_Parameters()
     {
         // Arrange
-        var mockError = new CallError(ErrorCodes.VOICEFLEX_0002);
+        var mockError = new CallError(ErrorCodes.VOICEFLEX_0001);
         _mockPhoneNumberValidator
             .Setup(v => v.Error(It.IsAny<PhoneNumberDto>(), out mockError))
             .Returns(true);
@@ -71,7 +71,7 @@ public class PhoneNumberManagerTests
 
         // Assert
         Assert.That(error, Is.Not.Null);
-        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0002));
+        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0001));
     }
 
     [Test]
@@ -88,7 +88,7 @@ public class PhoneNumberManagerTests
             .ReturnsAsync(_phoneNumber);
 
         // Act
-        var phoneNumber = await _phoneNumberManager.UpdatePhoneNumberAsync(phoneNumberId, phoneNumberUpdateDto);
+        var phoneNumber = await _phoneNumberManager.AssignPhoneNumberAsync(phoneNumberId, phoneNumberUpdateDto);
 
         // Assert
         _mockAccountAccessor.Verify(accessor => accessor.GetAsync(It.Is<Guid>(p => p.Equals(_accountId))), Times.Once);
@@ -106,11 +106,11 @@ public class PhoneNumberManagerTests
             .ReturnsAsync(nullAccount);
 
         // Act
-        var error = await _phoneNumberManager.UpdatePhoneNumberAsync(phoneNumberId, phoneNumberUpdateDto) as CallError;
+        var error = await _phoneNumberManager.AssignPhoneNumberAsync(phoneNumberId, phoneNumberUpdateDto) as CallError;
 
         // Assert
         Assert.That(error, Is.Not.Null);
-        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0005));
+        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0004));
     }
 
     [Test]
@@ -124,11 +124,11 @@ public class PhoneNumberManagerTests
             .ReturnsAsync(_suspendedAccount);
 
         // Act
-        var error = await _phoneNumberManager.UpdatePhoneNumberAsync(phoneNumberId, phoneNumberUpdateDto) as CallError;
+        var error = await _phoneNumberManager.AssignPhoneNumberAsync(phoneNumberId, phoneNumberUpdateDto) as CallError;
 
         // Assert
         Assert.That(error, Is.Not.Null);
-        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0004));
+        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0003));
     }
 
     [Test]
@@ -142,7 +142,7 @@ public class PhoneNumberManagerTests
             .ReturnsAsync(_phoneNumber);
 
         // Act
-        var actualPhoneNumber = await _phoneNumberManager.UpdatePhoneNumberAsync(phoneNumberId, phoneNumberUpdateDto);
+        var actualPhoneNumber = await _phoneNumberManager.AssignPhoneNumberAsync(phoneNumberId, phoneNumberUpdateDto);
 
         // Assert
         _mockPhoneNumberAccessor.Verify(accessor => accessor.UpdateAsync(

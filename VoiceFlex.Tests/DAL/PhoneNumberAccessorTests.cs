@@ -100,7 +100,7 @@ public class PhoneNumberAccessorTests
         Assert.That(error, Is.Not.Null);
         Assert.Multiple(() =>
         {
-            Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0007));
+            Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0006));
             Assert.That(actualPhoneNumbers, Has.Count.EqualTo(1));
         });
     }
@@ -148,7 +148,7 @@ public class PhoneNumberAccessorTests
 
         // Assert
         Assert.That(error, Is.Not.Null);
-        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0001));
+        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0000));
     }
 
     [Test]
@@ -163,7 +163,7 @@ public class PhoneNumberAccessorTests
 
         // Assert
         Assert.That(error, Is.Not.Null);
-        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0003));
+        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0002));
         Assert.Multiple(() =>
         {
             Assert.That(actualPhoneNumber.Id, Is.EqualTo(_assignedPhoneNumber.Id));
@@ -191,7 +191,7 @@ public class PhoneNumberAccessorTests
 
         // Assert
         Assert.That(error, Is.Not.Null);
-        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0001));
+        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0000));
     }
 
     [TearDown]

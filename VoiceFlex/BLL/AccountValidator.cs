@@ -4,20 +4,18 @@ namespace VoiceFlex.BLL;
 
 public interface IAccountValidator
 {
-    bool Error(AccountDto account, out CallError error);
+    ICallResult NewAccountError(AccountDto account);
 }
 
 public class AccountValidator : IAccountValidator
 {
     public AccountValidator() { }
 
-    public bool Error(AccountDto account, out CallError error)
-    {
-        error = account.Description is null
+    public ICallResult NewAccountError(AccountDto account)
+        // The description must have at least 1 and not more than 1023 characters
+        => account.Description is null
             || account.Description.Length < 1
             || account.Description.Length > 1023
-            ? new CallError(ErrorCodes.VOICEFLEX_0006)
+            ? new CallError(ErrorCodes.VOICEFLEX_0005)
             : null;
-        return error is not null;
-    }
 }

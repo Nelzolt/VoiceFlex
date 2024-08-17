@@ -44,7 +44,7 @@ public class AccountManagerTests
     public async Task CreateAccountAsync_Should_Call_AccountValidator_Error_With_Correct_Parameters()
     {
         // Arrange
-        var mockError = new CallError(ErrorCodes.VOICEFLEX_0006);
+        var mockError = new CallError(ErrorCodes.VOICEFLEX_0005);
         _mockAccountValidator
             .Setup(v => v.Error(It.IsAny<AccountDto>(), out mockError))
             .Returns(true);
@@ -54,7 +54,7 @@ public class AccountManagerTests
 
         // Assert
         Assert.That(error, Is.Not.Null);
-        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0006));
+        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0005));
     }
 
     [Test]
