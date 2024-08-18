@@ -3,50 +3,43 @@ using VoiceFlex.DTO;
 
 namespace VoiceFlex.Tests.BLL;
 
-public class AccountValidatorTests
+public class AccountValidatorTests : ValidatorTests
 {
     private AccountValidator _accountValidator;
-    private AccountDto _testAccount;
-    private CallError _error;
-
 
     [SetUp]
     public void SetUp()
     {
         _accountValidator = new AccountValidator();
-        _testAccount = new AccountDto();
     }
 
-    [TestCase(null)]
-    [TestCase("")]
-    [TestCase("et1huIlqTkA3Y4VF82pZHpCcOoWlmJFQHJ9RPuDW2o3qWLL81RDA41CwswQ4S6PjEhBo101RJIF5pf3YzDVWVY43hjqwpBAbWgQhAeY48UORVAOtlONbcmM6D2Bp86xKhwOEU5GLEaurSU6xYpkyn2iZRE8sxEiYzMKnS1rzFxUpFBL3VLhf0xCPXh6SusYtJwg3SSNoC47JWirGupvHuZOCSq3IT417ORTdmnXwraqzsAuOoUR3ZzgEv81IRJRiylnDgPu6uxIqkYYGZsVVr7ISLdO2wGpyEG5cgqHxObjbpm7PckvCykMN0wY61Zi0Mmg2cFccvg9ngJu24wkKOCdDoVuLhGY79zAGEAeaUq4MM4cp1SB7MnvrCJ8dhCT7I0tZdA3Wv0pzSHYH1J1sS8eSWyv83xNAHe1EK5YYcvbeZSLSkvn64xdXybrWae0YOdHJ7s1XF04ehDYliJ9uIbmkzUijyq97wpnXAsixrAZrBkuxUnHD1kjSAfqIgT1cBKdfzsAnKfAz2KcoOp9YqL7WCnE41kRKmbhJdk35A53AuGXD8MVZKcnIcSQRmvikwUtVZcef1h6mFTHewTyRcIriZRq7OV6QU4hQDSCcIR29s16rNl9HnNgcFqISIia2XK5jLnuIV2esGlRdCEQPGB48vivdR5expQUueZwZcGVKIXf4JpbL3RuiScItW2eUVkhfbgwgG5i4PxvB3aJ9HQqJhocZWyF9IyXqsyjxWhjz6wDDgEkpCkvLioDDiSThTg35JTw644EeUzkFmAOq47VaySsEelqs3qzrgPOaFNfartjua8KbtXwiVRGfwUSHycAhOAVhjbJrzTa1vKp2ViDmk9GbLfXaggibnsAfYgDDhfe7RHD44XIDTRsrJLQtJT9GfYgwCUzfTJjZ7gSMEw3iMuFKN2wDNaLX0AkfKJx1Fk57YlSyUmETBvUEqOkjvZvU4zevMypyUGAvkWAbolmIIUZiHhCHRxSsrNrz7nf6KCzCNSEmvkrk0yvTr51G")]
-    public void Invalid_Data_Should_Return_Correct_Error_Code(string description)
+    [TestCase(true, true)]
+    [TestCase(false, false)]
+    public void FoundInDatabase_Should_Return_Correct_Result(bool entityFound, bool isValid)
     {
         // Arrange
-        _testAccount.Description = description;
+        var _account = entityFound ? new AccountDto() : null;
 
         // Act
-        var _error = _accountValidator.NewAccountError(_testAccount) as CallError;
+        var error = _accountValidator.FoundInDatabase(_account).ErrorFound as CallError;
 
         // Assert
-        Assert.Multiple(() =>
-        {
-            Assert.That(_error, Is.Not.Null);
-            Assert.That(_error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0005));
-        });
+        AssertValidationResult(error, isValid, ErrorCodes.VOICEFLEX_0000);
     }
 
-    [TestCase("a")]
-    [TestCase("t1huIlqTkA3Y4VF82pZHpCcOoWlmJFQHJ9RPuDW2o3qWLL81RDA41CwswQ4S6PjEhBo101RJIF5pf3YzDVWVY43hjqwpBAbWgQhAeY48UORVAOtlONbcmM6D2Bp86xKhwOEU5GLEaurSU6xYpkyn2iZRE8sxEiYzMKnS1rzFxUpFBL3VLhf0xCPXh6SusYtJwg3SSNoC47JWirGupvHuZOCSq3IT417ORTdmnXwraqzsAuOoUR3ZzgEv81IRJRiylnDgPu6uxIqkYYGZsVVr7ISLdO2wGpyEG5cgqHxObjbpm7PckvCykMN0wY61Zi0Mmg2cFccvg9ngJu24wkKOCdDoVuLhGY79zAGEAeaUq4MM4cp1SB7MnvrCJ8dhCT7I0tZdA3Wv0pzSHYH1J1sS8eSWyv83xNAHe1EK5YYcvbeZSLSkvn64xdXybrWae0YOdHJ7s1XF04ehDYliJ9uIbmkzUijyq97wpnXAsixrAZrBkuxUnHD1kjSAfqIgT1cBKdfzsAnKfAz2KcoOp9YqL7WCnE41kRKmbhJdk35A53AuGXD8MVZKcnIcSQRmvikwUtVZcef1h6mFTHewTyRcIriZRq7OV6QU4hQDSCcIR29s16rNl9HnNgcFqISIia2XK5jLnuIV2esGlRdCEQPGB48vivdR5expQUueZwZcGVKIXf4JpbL3RuiScItW2eUVkhfbgwgG5i4PxvB3aJ9HQqJhocZWyF9IyXqsyjxWhjz6wDDgEkpCkvLioDDiSThTg35JTw644EeUzkFmAOq47VaySsEelqs3qzrgPOaFNfartjua8KbtXwiVRGfwUSHycAhOAVhjbJrzTa1vKp2ViDmk9GbLfXaggibnsAfYgDDhfe7RHD44XIDTRsrJLQtJT9GfYgwCUzfTJjZ7gSMEw3iMuFKN2wDNaLX0AkfKJx1Fk57YlSyUmETBvUEqOkjvZvU4zevMypyUGAvkWAbolmIIUZiHhCHRxSsrNrz7nf6KCzCNSEmvkrk0yvTr51G")]
-    public void Valid_Data_Should_Not_Return_Error(string description)
+    [TestCase(null, false)]
+    [TestCase("", false)]
+    [TestCase("a", true)]
+    [TestCase("t1huIlqTkA3Y4VF82pZHpCcOoWlmJFQHJ9RPuDW2o3qWLL81RDA41CwswQ4S6PjEhBo101RJIF5pf3YzDVWVY43hjqwpBAbWgQhAeY48UORVAOtlONbcmM6D2Bp86xKhwOEU5GLEaurSU6xYpkyn2iZRE8sxEiYzMKnS1rzFxUpFBL3VLhf0xCPXh6SusYtJwg3SSNoC47JWirGupvHuZOCSq3IT417ORTdmnXwraqzsAuOoUR3ZzgEv81IRJRiylnDgPu6uxIqkYYGZsVVr7ISLdO2wGpyEG5cgqHxObjbpm7PckvCykMN0wY61Zi0Mmg2cFccvg9ngJu24wkKOCdDoVuLhGY79zAGEAeaUq4MM4cp1SB7MnvrCJ8dhCT7I0tZdA3Wv0pzSHYH1J1sS8eSWyv83xNAHe1EK5YYcvbeZSLSkvn64xdXybrWae0YOdHJ7s1XF04ehDYliJ9uIbmkzUijyq97wpnXAsixrAZrBkuxUnHD1kjSAfqIgT1cBKdfzsAnKfAz2KcoOp9YqL7WCnE41kRKmbhJdk35A53AuGXD8MVZKcnIcSQRmvikwUtVZcef1h6mFTHewTyRcIriZRq7OV6QU4hQDSCcIR29s16rNl9HnNgcFqISIia2XK5jLnuIV2esGlRdCEQPGB48vivdR5expQUueZwZcGVKIXf4JpbL3RuiScItW2eUVkhfbgwgG5i4PxvB3aJ9HQqJhocZWyF9IyXqsyjxWhjz6wDDgEkpCkvLioDDiSThTg35JTw644EeUzkFmAOq47VaySsEelqs3qzrgPOaFNfartjua8KbtXwiVRGfwUSHycAhOAVhjbJrzTa1vKp2ViDmk9GbLfXaggibnsAfYgDDhfe7RHD44XIDTRsrJLQtJT9GfYgwCUzfTJjZ7gSMEw3iMuFKN2wDNaLX0AkfKJx1Fk57YlSyUmETBvUEqOkjvZvU4zevMypyUGAvkWAbolmIIUZiHhCHRxSsrNrz7nf6KCzCNSEmvkrk0yvTr51G",
+        true)]
+    [TestCase("et1huIlqTkA3Y4VF82pZHpCcOoWlmJFQHJ9RPuDW2o3qWLL81RDA41CwswQ4S6PjEhBo101RJIF5pf3YzDVWVY43hjqwpBAbWgQhAeY48UORVAOtlONbcmM6D2Bp86xKhwOEU5GLEaurSU6xYpkyn2iZRE8sxEiYzMKnS1rzFxUpFBL3VLhf0xCPXh6SusYtJwg3SSNoC47JWirGupvHuZOCSq3IT417ORTdmnXwraqzsAuOoUR3ZzgEv81IRJRiylnDgPu6uxIqkYYGZsVVr7ISLdO2wGpyEG5cgqHxObjbpm7PckvCykMN0wY61Zi0Mmg2cFccvg9ngJu24wkKOCdDoVuLhGY79zAGEAeaUq4MM4cp1SB7MnvrCJ8dhCT7I0tZdA3Wv0pzSHYH1J1sS8eSWyv83xNAHe1EK5YYcvbeZSLSkvn64xdXybrWae0YOdHJ7s1XF04ehDYliJ9uIbmkzUijyq97wpnXAsixrAZrBkuxUnHD1kjSAfqIgT1cBKdfzsAnKfAz2KcoOp9YqL7WCnE41kRKmbhJdk35A53AuGXD8MVZKcnIcSQRmvikwUtVZcef1h6mFTHewTyRcIriZRq7OV6QU4hQDSCcIR29s16rNl9HnNgcFqISIia2XK5jLnuIV2esGlRdCEQPGB48vivdR5expQUueZwZcGVKIXf4JpbL3RuiScItW2eUVkhfbgwgG5i4PxvB3aJ9HQqJhocZWyF9IyXqsyjxWhjz6wDDgEkpCkvLioDDiSThTg35JTw644EeUzkFmAOq47VaySsEelqs3qzrgPOaFNfartjua8KbtXwiVRGfwUSHycAhOAVhjbJrzTa1vKp2ViDmk9GbLfXaggibnsAfYgDDhfe7RHD44XIDTRsrJLQtJT9GfYgwCUzfTJjZ7gSMEw3iMuFKN2wDNaLX0AkfKJx1Fk57YlSyUmETBvUEqOkjvZvU4zevMypyUGAvkWAbolmIIUZiHhCHRxSsrNrz7nf6KCzCNSEmvkrk0yvTr51G",
+        false)]
+    public void DescriptionMustBeValid_Should_Return_Correct_Result(string description, bool isValid)
     {
-        // Arrange
-        _testAccount.Description = description;
-
         // Act
-        var error = _accountValidator.NewAccountError(_testAccount);
+        var error = _accountValidator.DescriptionMustBeValid(description).ErrorFound as CallError;
 
         // Assert
-        Assert.That(error, Is.Null);
+        AssertValidationResult(error, isValid, ErrorCodes.VOICEFLEX_0005);
     }
 }

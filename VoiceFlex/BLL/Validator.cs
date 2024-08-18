@@ -2,29 +2,21 @@
 
 namespace VoiceFlex.BLL;
 
-public interface IValidator
+public interface IValidator<T> where T : IValidator<T>
 {
-    bool NotFoundError(object entity, out ICallResult error);
-    ICallResult NotFoundError(object entity);
+    ICallResult ErrorFound { get; }
 }
 
-public class Validator : IValidator
+public class Validator<T> : IValidator<T> where T : Validator<T>
 {
-    public bool NotFoundError(object entity, out ICallResult error)
-        => NotFoundError(entity, ErrorCodes.VOICEFLEX_0000, out error);
+    public ICallResult ErrorFound { get; private set; }
 
-    public bool NotFoundError(object entity, ErrorCodes errorCode, out ICallResult error)
+    protected T SetErrorIf(bool condition, ErrorCodes errorCode)
     {
-        error = entity is null ? new CallError(errorCode) : null;
-        return error is not null;
-    }
-
-    public ICallResult NotFoundError(object entity)
-    {
-        if (entity is null)
+        if (ErrorFound is null && condition)
         {
-            return new CallError(ErrorCodes.VOICEFLEX_0000);
+            ErrorFound = new CallError(errorCode);
         }
-        return null;
+        return this as T;
     }
 }

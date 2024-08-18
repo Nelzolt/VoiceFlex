@@ -10,7 +10,8 @@ public interface IPhoneNumberAccessor
     Task<PhoneNumber> CreateAsync(PhoneNumberDto phoneNumber);
     Task<PhoneNumber> GetAsync(Guid id);
     Task<PhoneNumber> GetByNumberAsync(string number);
-    Task<PhoneNumber> AssignUnassignAsync(PhoneNumber phoneNumber, Guid? accountId);
+    Task<PhoneNumber> AssignAsync(PhoneNumber phoneNumber, Guid? accountId);
+    Task<PhoneNumber> UnassignAsync(PhoneNumber phoneNumber);
     Task<PhoneNumber> DeleteAsync(Guid id);
 }
 
@@ -38,12 +39,15 @@ public class PhoneNumberAccessor : IPhoneNumberAccessor
             .Where(p => p.Number.Equals(number))
             .FirstOrDefaultAsync();
 
-    public async Task<PhoneNumber> AssignUnassignAsync(PhoneNumber phoneNumber, Guid? accountId)
+    public async Task<PhoneNumber> AssignAsync(PhoneNumber phoneNumber, Guid? accountId)
     {
         phoneNumber.AccountId = accountId;
         await _dbContext.SaveChangesAsync();
         return phoneNumber;
     }
+
+    public async Task<PhoneNumber> UnassignAsync(PhoneNumber phoneNumber)
+        => await AssignAsync(phoneNumber, null);
 
     public async Task<PhoneNumber> DeleteAsync(Guid id)
     {

@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using VoiceFlex.BLL;
 using VoiceFlex.DAL;
 using VoiceFlex.Data;
 using VoiceFlex.DTO;
@@ -83,28 +82,6 @@ public class PhoneNumberAccessorTests
         Assert.That(createdPhoneNumber, Is.Not.Null);
     }
 
-    //[Test]
-    //public async Task CreateAsync_Should_Not_Add_PhoneNumber_To_Db_And_Return_Error_If_Number_Already_Exists()
-    //{
-    //    // Arrange
-    //    _newPhoneNumber.Number = "0555444";
-
-    //    // Act
-    //    var error = await _phoneNumberAccessor.CreateAsync(_newPhoneNumber) as CallError;
-    //    var actualPhoneNumbers = _dbContext.VOICEFLEX_PhoneNumbers
-    //        .AsNoTracking()
-    //        .Where(p => p.Number.Equals(_newPhoneNumber.Number))
-    //        .ToList();
-
-    //    // Assert
-    //    Assert.That(error, Is.Not.Null);
-    //    Assert.Multiple(() =>
-    //    {
-    //        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0006));
-    //        Assert.That(actualPhoneNumbers, Has.Count.EqualTo(1));
-    //    });
-    //}
-
     [Test]
     public async Task UpdateAsync_Should_Assign_Unassign_PhoneNumber_In_Db_And_Return_Updated_PhoneNumber()
     {
@@ -112,7 +89,7 @@ public class PhoneNumberAccessorTests
         var phoneNumberUpdateDto = new PhoneNumberUpdateDto { AccountId = _accountId };
 
         // Act
-        var updatedPhoneNumber = await _phoneNumberAccessor.AssignUnassignAsync(_phoneNumber, _accountId);
+        var updatedPhoneNumber = await _phoneNumberAccessor.AssignAsync(_phoneNumber, _accountId);
 
         // Assert
         Assert.Multiple(() =>
@@ -123,7 +100,7 @@ public class PhoneNumberAccessorTests
         });
 
         // Act
-        updatedPhoneNumber = await _phoneNumberAccessor.AssignUnassignAsync(_phoneNumber, null);
+        updatedPhoneNumber = await _phoneNumberAccessor.UnassignAsync(_phoneNumber);
 
         // Assert
         Assert.Multiple(() =>
@@ -135,38 +112,6 @@ public class PhoneNumberAccessorTests
     }
 
     [Test]
-    public async Task UpdateAsync_Should_Return_Error_If_Account_With_This_Id_Is_Not_Found()
-    {
-        // Arrange
-        var phoneNumber = new PhoneNumber { Id = Guid.NewGuid() };
-
-        // Act
-        var error = await _phoneNumberAccessor.AssignUnassignAsync(phoneNumber, _accountId);
-
-        // Assert
-        Assert.That(error, Is.Not.Null);
-        //Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0000));
-    }
-
-    //[Test]
-    //public async Task UpdateAsync_Should_Not_Assign_PhoneNumber_In_Db_And_Return_Error_If_Already_Assigned()
-    //{
-    //    // Act
-    //    var ph = await _phoneNumberAccessor.AssignUnassignAsync(_assignedPhoneNumber, _newAccountId);
-    //    var actualPhoneNumber = _dbContext.VOICEFLEX_PhoneNumbers.Find(_assignedPhoneNumber.Id);
-
-    //    // Assert
-    //    Assert.That(error, Is.Not.Null);
-    //    Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0002));
-    //    Assert.Multiple(() =>
-    //    {
-    //        Assert.That(actualPhoneNumber.Id, Is.EqualTo(_assignedPhoneNumber.Id));
-    //        Assert.That(actualPhoneNumber.Number, Is.EqualTo(_assignedPhoneNumber.Number));
-    //        Assert.That(actualPhoneNumber.AccountId, Is.EqualTo(_assignedPhoneNumber.AccountId));
-    //    });
-    //}
-
-    [Test]
     public async Task DeleteAsync_Should_Delete_PhoneNumber_From_Db()
     {
         // Act
@@ -176,17 +121,6 @@ public class PhoneNumberAccessorTests
         var deletedPhoneNumber = await _dbContext.VOICEFLEX_PhoneNumbers.FindAsync(_phoneNumberToDelete.Id);
         Assert.That(deletedPhoneNumber, Is.Null);
     }
-
-    //[Test]
-    //public async Task DeleteAsync_Should_Return_Error_If_Account_With_This_Id_Is_Not_Found()
-    //{
-    //    // Act
-    //    var error = await _phoneNumberAccessor.DeleteAsync(Guid.NewGuid()) as CallError;
-
-    //    // Assert
-    //    Assert.That(error, Is.Not.Null);
-    //    Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0000));
-    //}
 
     [TearDown]
     public void TearDown()
