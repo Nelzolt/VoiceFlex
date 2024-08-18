@@ -2,25 +2,20 @@
 using VoiceFlex.BLL;
 using VoiceFlex.DAL;
 using VoiceFlex.DTO;
-using VoiceFlex.Models;
 
 namespace VoiceFlex.Tests.BLL;
 
 public class PhoneNumberValidatorTests
 {
     private Mock<IPhoneNumberAccessor> _mockPhoneNumberAccessor;
-    private Mock<IAccountAccessor> _mockAccountAccessor;
     private PhoneNumberValidator _phoneNumberValidator;
     private PhoneNumberDto _testPhoneNumber;
-    private CallError _error;
-
 
     [SetUp]
     public void SetUp()
     {
         _mockPhoneNumberAccessor = new Mock<IPhoneNumberAccessor>();
-        _mockAccountAccessor = new Mock<IAccountAccessor>();
-        _phoneNumberValidator = new PhoneNumberValidator(_mockPhoneNumberAccessor.Object, _mockAccountAccessor.Object);
+        _phoneNumberValidator = new PhoneNumberValidator(_mockPhoneNumberAccessor.Object);
         _testPhoneNumber = new PhoneNumberDto();
     }
 
@@ -33,13 +28,13 @@ public class PhoneNumberValidatorTests
         _testPhoneNumber.Number = number;
 
         // Act
-        _error = await _phoneNumberValidator.NewPhoneNumberErrorAsync(_testPhoneNumber);
+        var error = await _phoneNumberValidator.NewPhoneNumberErrorsAsync(_testPhoneNumber) as CallError;
 
         // Assert
         Assert.Multiple(() =>
         {
-            Assert.That(_error, Is.Not.Null);
-            Assert.That(_error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0001));
+            Assert.That(error, Is.Not.Null);
+            Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0001));
         });
     }
 
@@ -51,7 +46,7 @@ public class PhoneNumberValidatorTests
         _testPhoneNumber.Number = number;
 
         // Act
-        var error = await _phoneNumberValidator.NewPhoneNumberErrorAsync(_testPhoneNumber);
+        var error = await _phoneNumberValidator.NewPhoneNumberErrorsAsync(_testPhoneNumber);
 
         // Assert
         Assert.That(error, Is.Null);

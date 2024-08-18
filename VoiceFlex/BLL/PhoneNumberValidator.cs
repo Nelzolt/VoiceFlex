@@ -4,72 +4,63 @@ using VoiceFlex.Models;
 
 namespace VoiceFlex.BLL;
 
-public interface IPhoneNumberValidator
+public interface IPhoneNumberValidator : IValidator
 {
-    Task<CallError> NewPhoneNumberErrorAsync(PhoneNumberDto phoneNumber);
-    Task<CallError> AssignPhoneNumberError(PhoneNumber phoneNumber, PhoneNumberUpdateDto phoneNumberUpdate);
-    CallError UnassignPhoneNumberError(PhoneNumber phoneNumber);
+    Task<ICallResult> NewPhoneNumberErrorsAsync(PhoneNumberDto phoneNumber);
+    ICallResult AssignPhoneNumberErrors(PhoneNumber phoneNumber, AccountDto account);
 }
 
-public class PhoneNumberValidator : IPhoneNumberValidator
+public class PhoneNumberValidator : Validator, IPhoneNumberValidator
 {
     private readonly IPhoneNumberAccessor _phoneNumberAccessor;
-    private readonly IAccountAccessor _accountAccessor;
+    private ICallResult _error;
 
-    public PhoneNumberValidator(
-        IPhoneNumberAccessor phoneNumberAccessor,
-        IAccountAccessor accountAccessor)
-        => (_phoneNumberAccessor, _accountAccessor)
-            = (phoneNumberAccessor, accountAccessor);
+    public PhoneNumberValidator(IPhoneNumberAccessor phoneNumberAccessor)
+        => _phoneNumberAccessor = phoneNumberAccessor;
 
-    public async Task<CallError> NewPhoneNumberErrorAsync(PhoneNumberDto phoneNumber)
+    public async Task<ICallResult> NewPhoneNumberErrorsAsync(PhoneNumberDto phoneNumber)
     {
-        // The number must have at least 1 and not more than 11 characters
-        var error = phoneNumber.Number is null
+        // The phone number must have at least 1 and not more than 11 characters
+        if (phoneNumber.Number is null
             || phoneNumber.Number.Length < 1
-            || phoneNumber.Number.Length > 11
-            ? new CallError(ErrorCodes.VOICEFLEX_0001)
-            : null;
-        if (error is not null) { return error; }
+            || phoneNumber.Number.Length > 11)
+        {
+            return new CallError(ErrorCodes.VOICEFLEX_0001);
+        }
 
         // A phone number with this number already exists
-        return await _phoneNumberAccessor.GetByNumberAsync(phoneNumber.Number) is not null
-            ? new CallError(ErrorCodes.VOICEFLEX_0006)
-            : null;
-    }
-
-    public async Task<CallError> AssignPhoneNumberError(PhoneNumber phoneNumber, PhoneNumberUpdateDto phoneNumberUpdate)
-    {
-        // A phone number with this id could not be found
-        if (phoneNumber is null)
+        if (await _phoneNumberAccessor.GetByNumberAsync(phoneNumber.Number) is not null)
         {
-            return new CallError(ErrorCodes.VOICEFLEX_0000);
-        }
-
-        var account = await _accountAccessor.GetAsync((Guid)phoneNumberUpdate.AccountId) as AccountDto;
-
-        // An account with this account id could not be found
-        if (account is null)
-        {
-            return new CallError(ErrorCodes.VOICEFLEX_0004);
-        }
-
-        // A phone number cannot be assigned to a suspended account
-        if (account.Status == AccountStatus.Suspended)
-        {
-            return new CallError(ErrorCodes.VOICEFLEX_0003);
-        }
-
-        // This phone number is already assigned to someone else
-        if (phoneNumberUpdate.AccountId is not null)
-        {
-            return new CallError(ErrorCodes.VOICEFLEX_0002);
+            return new CallError(ErrorCodes.VOICEFLEX_0006);
         }
         return null;
     }
 
-    public CallError UnassignPhoneNumberError(PhoneNumber phoneNumber)
-        => phoneNumber is null
-            ? new CallError(ErrorCodes.VOICEFLEX_0000)
-            : null;
+    public ICallResult AssignPhoneNumberErrors(PhoneNumber phoneNumber, AccountDto account)
+    {
+        if (NotFoundError(phoneNumber, out _error))
+        {
+            // A phone number with this id could not be found
+            return _error;
+        }
+
+        if (NotFoundError(account, ErrorCodes.VOICEFLEX_0004, out _error))
+        {
+            // An account with this account id could not be found
+            return _error;
+        }
+
+        if (account.Status == AccountStatus.Suspended)
+        {
+            // A phone number cannot be assigned to a suspended account
+            return new CallError(ErrorCodes.VOICEFLEX_0003);
+        }
+
+        if (phoneNumber.AccountId is not null)
+        {
+            // This phone number is already assigned to another account
+            return new CallError(ErrorCodes.VOICEFLEX_0002);
+        }
+        return null;
+    }
 }

@@ -24,22 +24,32 @@ public class PhoneNumberManager : IPhoneNumberManager
             = (phoneNumberValidator, phoneNumberAccessor, accountAccessor);
 
     public async Task<ICallResult> CreatePhoneNumberAsync(PhoneNumberDto phoneNumber)
-        => await _phoneNumberValidator.NewPhoneNumberErrorAsync(phoneNumber) as ICallResult
+    {
+        return await _phoneNumberValidator.NewPhoneNumberErrorsAsync(phoneNumber)
             ?? await _phoneNumberAccessor.CreateAsync(phoneNumber);
+    }
 
     public async Task<ICallResult> AssignUnassignPhoneNumberAsync(Guid id, PhoneNumberUpdateDto phoneNumberUpdate)
     {
-        phoneNumberUpdate.Id = id;
-        var isAssignAttempt = phoneNumberUpdate.AccountId is not null;
-        var dbPhoneNumber = await _phoneNumberAccessor.GetAsync(phoneNumberUpdate.Id);
-        var error = isAssignAttempt
-            ? await _phoneNumberValidator.AssignPhoneNumberError(dbPhoneNumber, phoneNumberUpdate)
-            : _phoneNumberValidator.UnassignPhoneNumberError(dbPhoneNumber);
-        return error as ICallResult
+        var dbPhoneNumber = await _phoneNumberAccessor.GetAsync(id);
+
+        return await ErrorCheckResult(isAssignAttempt: phoneNumberUpdate.AccountId is not null)
             ?? await _phoneNumberAccessor.AssignUnassignAsync(dbPhoneNumber, phoneNumberUpdate.AccountId);
+
+        async Task<ICallResult> ErrorCheckResult(bool isAssignAttempt)
+        {
+            if (isAssignAttempt)
+            {
+                var account = await _accountAccessor.GetAsync((Guid)phoneNumberUpdate.AccountId);
+                return _phoneNumberValidator.AssignPhoneNumberErrors(dbPhoneNumber, account);
+            }
+            return _phoneNumberValidator.NotFoundError(dbPhoneNumber);
+        }
     }
 
     public async Task<ICallResult> DeletePhoneNumberAsync(Guid id)
-        => await _phoneNumberAccessor.DeleteAsync(id)
-            ?? (ICallResult)new CallError(ErrorCodes.VOICEFLEX_0000);
+    {
+        var dbPhoneNumber = await _phoneNumberAccessor.DeleteAsync(id);
+        return _phoneNumberValidator.NotFoundError(dbPhoneNumber) ?? dbPhoneNumber;
+    }
 }

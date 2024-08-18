@@ -14,7 +14,7 @@ public class ErrorManager : IErrorManager
     {
         { ErrorCodes.VOICEFLEX_0000, "404|A resource with this id could not be found." },
         { ErrorCodes.VOICEFLEX_0001, "400|The number must have at least 1 and not more than 11 characters." },
-        { ErrorCodes.VOICEFLEX_0002, "400|This phone number is already assigned to someone else." },
+        { ErrorCodes.VOICEFLEX_0002, "400|This phone number is already assigned to another account." },
         { ErrorCodes.VOICEFLEX_0003, "400|A phone number cannot be assigned to a suspended account." },
         { ErrorCodes.VOICEFLEX_0004, "404|An account with this account id could not be found." },
         { ErrorCodes.VOICEFLEX_0005, "400|The description must have at least 1 and not more than 1023 characters." },
