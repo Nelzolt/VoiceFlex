@@ -35,8 +35,8 @@ public class AccountManager : IAccountManager
         var account = await _accountAccessor.GetAsync(id);
         return _accountValidator
             .FoundInDatabase(account)
-            .ErrorFound ??
-            account;
+            .ErrorFound
+            ?? account;
     }
 
     public async Task<ICallResult> UpdateAccountAsync(Guid id, AccountUpdateDto accountUpdateDto)
@@ -46,7 +46,7 @@ public class AccountManager : IAccountManager
             : await _accountAccessor.SetSuspendedAsync(id);
         return _accountValidator
             .FoundInDatabase(account)
-            .ErrorFound ??
-            account;
+            .ErrorFound
+            ?? account;
     }
 }

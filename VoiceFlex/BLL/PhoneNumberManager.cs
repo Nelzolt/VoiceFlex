@@ -31,8 +31,8 @@ public class PhoneNumberManager : IPhoneNumberManager
         return _phoneNumberValidator
             .NumberMustBeNew(existingPhoneNumber)
             .NumberMustBeValid(phoneNumber.Number)
-            .ErrorFound ??
-            await _phoneNumberAccessor.CreateAsync(phoneNumber);
+            .ErrorFound
+            ?? await _phoneNumberAccessor.CreateAsync(phoneNumber);
     }
 
     public async Task<ICallResult> AssignUnassignPhoneNumberAsync(Guid id, PhoneNumberUpdateDto phoneNumberUpdate)
@@ -52,16 +52,16 @@ public class PhoneNumberManager : IPhoneNumberManager
                 .AccountMustBeInDatabase(dbAccount)
                 .AccountMustBeActive(dbAccount?.Status)
                 .PhoneNumberMustBeUnassigned(dbPhoneNumber?.AccountId)
-                .ErrorFound ??
-                await _phoneNumberAccessor.AssignAsync(dbPhoneNumber, dbAccount.Id);
+                .ErrorFound
+                ?? await _phoneNumberAccessor.AssignAsync(dbPhoneNumber, dbAccount.Id);
         }
 
         async Task<ICallResult> UnassignPhoneNumber(PhoneNumber dbPhoneNumber)
         {
             return _phoneNumberValidator
                 .FoundInDatabase(dbPhoneNumber)
-                .ErrorFound ??
-                await _phoneNumberAccessor.UnassignAsync(dbPhoneNumber);
+                .ErrorFound
+                ?? await _phoneNumberAccessor.UnassignAsync(dbPhoneNumber);
         }
     }
 
@@ -70,7 +70,7 @@ public class PhoneNumberManager : IPhoneNumberManager
         var dbPhoneNumber = await _phoneNumberAccessor.DeleteAsync(id);
         return _phoneNumberValidator
             .FoundInDatabase(dbPhoneNumber)
-            .ErrorFound ??
-            dbPhoneNumber;
+            .ErrorFound
+            ?? dbPhoneNumber;
     }
 }
