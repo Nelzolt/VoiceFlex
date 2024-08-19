@@ -83,6 +83,36 @@ public class PhoneNumberAccessorTests
     }
 
     [Test]
+    public async Task GetAsync_Should_Find_PhoneNumber_In_Db()
+    {
+        // Act
+        var phoneNumber = await _phoneNumberAccessor.GetAsync(_phoneNumber.Id);
+
+        // Assert
+        Assert.Multiple(() =>
+        {
+            Assert.That(phoneNumber.Id, Is.EqualTo(_phoneNumber.Id));
+            Assert.That(phoneNumber.Number, Is.EqualTo(_phoneNumber.Number));
+            Assert.That(phoneNumber.AccountId, Is.EqualTo(_phoneNumber.AccountId));
+        });
+    }
+
+    [Test]
+    public async Task GetByNumberAsync_Should_Find_PhoneNumber_In_Db()
+    {
+        // Act
+        var phoneNumber = await _phoneNumberAccessor.GetByNumberAsync(_phoneNumber.Number);
+
+        // Assert
+        Assert.Multiple(() =>
+        {
+            Assert.That(phoneNumber.Id, Is.EqualTo(_phoneNumber.Id));
+            Assert.That(phoneNumber.Number, Is.EqualTo(_phoneNumber.Number));
+            Assert.That(phoneNumber.AccountId, Is.EqualTo(_phoneNumber.AccountId));
+        });
+    }
+
+    [Test]
     public async Task UpdateAsync_Should_Assign_Unassign_PhoneNumber_In_Db_And_Return_Updated_PhoneNumber()
     {
         // Arrange

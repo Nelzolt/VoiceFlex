@@ -67,6 +67,7 @@ public class AccountManagerTests
     }
 
     [TestCase(AccountStatus.Active)]
+    [TestCase(AccountStatus.Suspended)]
     public async Task UpdateAccountAsync_Should_Call_Validator_And_Accessor_With_Correct_Parameters(AccountStatus status)
     {
         // Arrange
