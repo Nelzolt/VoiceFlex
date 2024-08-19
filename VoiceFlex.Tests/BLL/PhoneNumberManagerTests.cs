@@ -95,7 +95,7 @@ public class PhoneNumberManagerTests
             .Setup(v => v.AccountMustBeInDatabase(It.IsAny<AccountDto>()))
             .Returns(_mockPhoneNumberValidator.Object);
         _mockPhoneNumberValidator
-            .Setup(v => v.AccountMustBeActive(It.IsAny<AccountStatus>()))
+            .Setup(v => v.AccountMustBeActive(It.IsAny<AccountStatus?>()))
             .Returns(_mockPhoneNumberValidator.Object);
         _mockPhoneNumberValidator
             .Setup(v => v.PhoneNumberMustBeUnassigned(It.IsAny<Guid?>()))

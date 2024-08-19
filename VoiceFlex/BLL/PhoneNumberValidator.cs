@@ -10,7 +10,7 @@ public interface IPhoneNumberValidator : IValidator<PhoneNumberValidator>
     IPhoneNumberValidator NumberMustBeNew(PhoneNumber phoneNumber);
     IPhoneNumberValidator NumberMustBeValid(string number);
     IPhoneNumberValidator AccountMustBeInDatabase(AccountDto account);
-    IPhoneNumberValidator AccountMustBeActive(AccountStatus status);
+    IPhoneNumberValidator AccountMustBeActive(AccountStatus? status);
     IPhoneNumberValidator PhoneNumberMustBeUnassigned(Guid? accountId);
 }
 
@@ -30,7 +30,7 @@ public class PhoneNumberValidator : Validator<PhoneNumberValidator>, IPhoneNumbe
     public IPhoneNumberValidator AccountMustBeInDatabase(AccountDto account)
         => SetErrorIf(account is null, ErrorCodes.VOICEFLEX_0004);
 
-    public IPhoneNumberValidator AccountMustBeActive(AccountStatus status)
+    public IPhoneNumberValidator AccountMustBeActive(AccountStatus? status)
         => SetErrorIf(status == AccountStatus.Suspended, ErrorCodes.VOICEFLEX_0003);
 
     public IPhoneNumberValidator PhoneNumberMustBeUnassigned(Guid? accountId)

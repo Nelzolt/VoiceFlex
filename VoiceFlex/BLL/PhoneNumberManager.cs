@@ -37,7 +37,7 @@ public class PhoneNumberManager : IPhoneNumberManager
 
     public async Task<ICallResult> AssignUnassignPhoneNumberAsync(Guid id, PhoneNumberUpdateDto phoneNumberUpdate)
     {
-        var isAssignAttempt = phoneNumberUpdate.AccountId is not null;
+        var isAssignAttempt = phoneNumberUpdate.AccountId is not null && phoneNumberUpdate.AccountId != Guid.Empty;
         var dbPhoneNumber = await _phoneNumberAccessor.GetAsync(id);
 
         return isAssignAttempt
@@ -50,8 +50,8 @@ public class PhoneNumberManager : IPhoneNumberManager
             return _phoneNumberValidator
                 .FoundInDatabase(dbPhoneNumber)
                 .AccountMustBeInDatabase(dbAccount)
-                .AccountMustBeActive(dbAccount.Status)
-                .PhoneNumberMustBeUnassigned(dbPhoneNumber.AccountId)
+                .AccountMustBeActive(dbAccount?.Status)
+                .PhoneNumberMustBeUnassigned(dbPhoneNumber?.AccountId)
                 .ErrorFound ??
                 await _phoneNumberAccessor.AssignAsync(dbPhoneNumber, dbAccount.Id);
         }
