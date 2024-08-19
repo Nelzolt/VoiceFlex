@@ -2,12 +2,12 @@
 
 namespace VoiceFlex.BLL;
 
-public interface IValidator<T> where T : IValidator<T>
+public interface IValidator
 {
     ICallResult ErrorFound { get; }
 }
 
-public class Validator<T> : IValidator<T> where T : Validator<T>
+public class Validator<T> : IValidator where T : Validator<T>
 {
     public ICallResult ErrorFound { get; private set; }
 

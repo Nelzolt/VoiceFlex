@@ -3,7 +3,7 @@ using VoiceFlex.Models;
 
 namespace VoiceFlex.BLL;
 
-public interface IPhoneNumberValidator : IValidator<PhoneNumberValidator>
+public interface IPhoneNumberValidator : IValidator
 {
 
     IPhoneNumberValidator FoundInDatabase<T>(T entity);

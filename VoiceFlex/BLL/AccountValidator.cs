@@ -1,6 +1,6 @@
 ﻿namespace VoiceFlex.BLL;
 
-public interface IAccountValidator : IValidator<AccountValidator>
+public interface IAccountValidator : IValidator
 {
     IAccountValidator FoundInDatabase<T>(T entity);
     IAccountValidator DescriptionMustBeValid(string description);
