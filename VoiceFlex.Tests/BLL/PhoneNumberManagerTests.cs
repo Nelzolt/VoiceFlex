@@ -121,11 +121,12 @@ public class PhoneNumberManagerTests
         Assert.That(assignedPhoneNumber, Is.EqualTo(_phoneNumber));
     }
 
-    [Test]
-    public async Task AssignUnassignPhoneNumberAsync_Unassign_Should_Call_Accessors_And_Validators_With_Correct_Parameters()
+    [TestCase("00000000-0000-0000-0000-000000000000")]
+    [TestCase(null)]
+    public async Task AssignUnassignPhoneNumberAsync_Unassign_Should_Call_Accessors_And_Validators_With_Correct_Parameters(Guid? accountId)
     {
         // Arrange
-        _phoneNumberUpdateDto.AccountId = null;
+        _phoneNumberUpdateDto.AccountId = accountId;
         _mockPhoneNumberAccessor
             .Setup(accessor => accessor.GetAsync(It.IsAny<Guid>()))
             .ReturnsAsync(_phoneNumber);
