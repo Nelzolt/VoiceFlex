@@ -24,18 +24,29 @@ public class AccountManager : IAccountManager
 
     public async Task<ICallResult> CreateAccountAsync(AccountDto account)
     {
-        if (_accountValidator.Error(account, out var callError))
-        {
-            return callError;
-        }
-        return await _accountAccessor.CreateAsync(account);
+        return _accountValidator
+            .DescriptionMustBeValid(account.Description)
+            .ErrorFound
+            ?? await _accountAccessor.CreateAsync(account);
     }
 
     public async Task<ICallResult> GetAccountWithPhoneNumbersAsync(Guid id)
-        => await _accountAccessor.GetAsync(id);
+    {
+        var account = await _accountAccessor.GetAsync(id);
+        return _accountValidator
+            .FoundInDatabase(account)
+            .ErrorFound ??
+            account;
+    }
 
     public async Task<ICallResult> UpdateAccountAsync(Guid id, AccountUpdateDto accountUpdateDto)
-        => accountUpdateDto.Status == AccountStatus.Active
+    {
+        var account = accountUpdateDto.Status == AccountStatus.Active
             ? await _accountAccessor.SetActiveAsync(id)
             : await _accountAccessor.SetSuspendedAsync(id);
+        return _accountValidator
+            .FoundInDatabase(account)
+            .ErrorFound ??
+            account;
+    }
 }

@@ -49,7 +49,7 @@ public class AccountApiEndpointsTests
             Description = "test",
             Status = AccountStatus.Active
         };
-        _callError = new CallError(ErrorCodes.VOICEFLEX_0001);
+        _callError = new CallError(ErrorCodes.VOICEFLEX_0000);
     }
 
     [Test]
@@ -80,7 +80,7 @@ public class AccountApiEndpointsTests
     public async Task CreateAccountAsync_Should_Return_Error_From_Manager()
     {
         // Arrange
-        var createError = new CallError(ErrorCodes.VOICEFLEX_0006);
+        var createError = new CallError(ErrorCodes.VOICEFLEX_0005);
         _mockAccountManager.Setup(m => m.CreateAccountAsync(It.IsAny<AccountDto>())).ReturnsAsync(createError);
 
         // Act & Assert Exception
@@ -91,7 +91,7 @@ public class AccountApiEndpointsTests
         // Assert
         Assert.Multiple(() =>
         {
-            Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0006.ToString()));
+            Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0005.ToString()));
             Assert.That(error.Message, Is.EqualTo("The description must have at least 1 and not more than 1023 characters."));
         });
     }
@@ -137,7 +137,7 @@ public class AccountApiEndpointsTests
         // Assert
         Assert.Multiple(() =>
         {
-            Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0001.ToString()));
+            Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0000.ToString()));
             Assert.That(error.Message, Is.EqualTo("A resource with this id could not be found."));
         });
     }
@@ -183,7 +183,7 @@ public class AccountApiEndpointsTests
         // Assert
         Assert.Multiple(() =>
         {
-            Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0001.ToString()));
+            Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0000.ToString()));
             Assert.That(error.Message, Is.EqualTo("A resource with this id could not be found."));
         });
     }

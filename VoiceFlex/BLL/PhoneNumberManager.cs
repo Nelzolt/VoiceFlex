@@ -7,7 +7,7 @@ namespace VoiceFlex.BLL;
 public interface IPhoneNumberManager
 {
     Task<ICallResult> CreatePhoneNumberAsync(PhoneNumberDto phoneNumber);
-    Task<ICallResult> UpdatePhoneNumberAsync(Guid id, PhoneNumberUpdateDto phoneNumberUpdateDto);
+    Task<ICallResult> AssignUnassignPhoneNumberAsync(Guid id, PhoneNumberUpdateDto phoneNumberUpdateDto);
     Task<ICallResult> DeletePhoneNumberAsync(Guid id);
 }
 
@@ -22,35 +22,55 @@ public class PhoneNumberManager : IPhoneNumberManager
         IPhoneNumberAccessor phoneNumberAccessor,
         IAccountAccessor accountAccessor)
         => (_phoneNumberValidator, _phoneNumberAccessor, _accountAccessor)
-        = (phoneNumberValidator, phoneNumberAccessor, accountAccessor);
+            = (phoneNumberValidator, phoneNumberAccessor, accountAccessor);
 
     public async Task<ICallResult> CreatePhoneNumberAsync(PhoneNumberDto phoneNumber)
     {
-        if (_phoneNumberValidator.Error(phoneNumber, out var callError))
-        {
-            return callError;
-        }
-        return await _phoneNumberAccessor.CreateAsync(phoneNumber);
+        var existingPhoneNumber = await _phoneNumberAccessor.GetByNumberAsync(phoneNumber.Number);
+
+        return _phoneNumberValidator
+            .NumberMustBeNew(existingPhoneNumber)
+            .NumberMustBeValid(phoneNumber.Number)
+            .ErrorFound ??
+            await _phoneNumberAccessor.CreateAsync(phoneNumber);
     }
 
-    public async Task<ICallResult> UpdatePhoneNumberAsync(Guid id, PhoneNumberUpdateDto phoneNumberUpdateDto)
+    public async Task<ICallResult> AssignUnassignPhoneNumberAsync(Guid id, PhoneNumberUpdateDto phoneNumberUpdate)
     {
-        var isAssignAttempt = phoneNumberUpdateDto.AccountId is not null;
-        if (isAssignAttempt)
+        var isAssignAttempt = phoneNumberUpdate.AccountId is not null;
+        var dbPhoneNumber = await _phoneNumberAccessor.GetAsync(id);
+
+        return isAssignAttempt
+            ? await AssignPhoneNumber(dbPhoneNumber)
+            : await UnassignPhoneNumber(dbPhoneNumber);
+
+        async Task <ICallResult> AssignPhoneNumber(PhoneNumber dbPhoneNumber)
         {
-            var account = await _accountAccessor.GetAsync((Guid)phoneNumberUpdateDto.AccountId) as AccountDto;
-            if (account is null)
-            {
-                return new CallError(ErrorCodes.VOICEFLEX_0005);
-            }
-            if (account.Status == AccountStatus.Suspended)
-            {
-                return new CallError(ErrorCodes.VOICEFLEX_0004);
-            }
+            var dbAccount = await _accountAccessor.GetAsync((Guid)phoneNumberUpdate.AccountId);
+            return _phoneNumberValidator
+                .FoundInDatabase(dbPhoneNumber)
+                .AccountMustBeInDatabase(dbAccount)
+                .AccountMustBeActive(dbAccount.Status)
+                .PhoneNumberMustBeUnassigned(dbPhoneNumber.AccountId)
+                .ErrorFound ??
+                await _phoneNumberAccessor.AssignAsync(dbPhoneNumber, dbAccount.Id);
         }
-        return await _phoneNumberAccessor.UpdateAsync(id, phoneNumberUpdateDto);
+
+        async Task<ICallResult> UnassignPhoneNumber(PhoneNumber dbPhoneNumber)
+        {
+            return _phoneNumberValidator
+                .FoundInDatabase(dbPhoneNumber)
+                .ErrorFound ??
+                await _phoneNumberAccessor.UnassignAsync(dbPhoneNumber);
+        }
     }
 
     public async Task<ICallResult> DeletePhoneNumberAsync(Guid id)
-        => await _phoneNumberAccessor.DeleteAsync(id);
+    {
+        var dbPhoneNumber = await _phoneNumberAccessor.DeleteAsync(id);
+        return _phoneNumberValidator
+            .FoundInDatabase(dbPhoneNumber)
+            .ErrorFound ??
+            dbPhoneNumber;
+    }
 }

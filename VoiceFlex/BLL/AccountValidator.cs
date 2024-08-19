@@ -1,23 +1,18 @@
-﻿using VoiceFlex.DTO;
+﻿namespace VoiceFlex.BLL;
 
-namespace VoiceFlex.BLL;
-
-public interface IAccountValidator
+public interface IAccountValidator : IValidator<AccountValidator>
 {
-    bool Error(AccountDto account, out CallError error);
+    IAccountValidator FoundInDatabase<T>(T entity);
+    IAccountValidator DescriptionMustBeValid(string description);
 }
 
-public class AccountValidator : IAccountValidator
+public class AccountValidator : Validator<AccountValidator>, IAccountValidator
 {
     public AccountValidator() { }
 
-    public bool Error(AccountDto account, out CallError error)
-    {
-        error = account.Description is null
-            || account.Description.Length < 1
-            || account.Description.Length > 1023
-            ? new CallError(ErrorCodes.VOICEFLEX_0006)
-            : null;
-        return error is not null;
-    }
+    public IAccountValidator FoundInDatabase<T>(T entity)
+        => SetErrorIf(entity is null, ErrorCodes.VOICEFLEX_0000);
+
+    public IAccountValidator DescriptionMustBeValid(string description)
+        => SetErrorIf(string.IsNullOrEmpty(description) || description.Length > 1023, ErrorCodes.VOICEFLEX_0005);
 }

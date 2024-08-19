@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using VoiceFlex.BLL;
 using VoiceFlex.DAL;
 using VoiceFlex.Data;
 using VoiceFlex.DTO;
@@ -93,17 +92,6 @@ public class AccountAccessorTests
     }
 
     [Test]
-    public async Task GetAsync_Should_Return_Error_If_Account_With_This_Id_Is_Not_Found()
-    {
-        // Act
-        var error = await _accountAccessor.GetAsync(Guid.NewGuid()) as CallError;
-
-        // Assert
-        Assert.That(error, Is.Not.Null);
-        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0001));
-    }
-
-    [Test]
     public async Task SetActiveAsync_Should_Update_Account_In_Db_And_Return_Updated_Account()
     {
         // Act
@@ -116,17 +104,6 @@ public class AccountAccessorTests
             Assert.That(updatedAccount.Status, Is.EqualTo(AccountStatus.Active));
             Assert.That(updatedAccount.Description, Is.EqualTo(_suspendedAccount.Description));
         });
-    }
-
-    [Test]
-    public async Task SetActiveAsync_Should_Return_Error_If_Account_With_This_Id_Is_Not_Found()
-    {
-        // Act
-        var error = await _accountAccessor.SetActiveAsync(Guid.NewGuid()) as CallError;
-
-        // Assert
-        Assert.That(error, Is.Not.Null);
-        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0001));
     }
 
     [Test]
@@ -143,17 +120,6 @@ public class AccountAccessorTests
             Assert.That(updatedAccount.Description, Is.EqualTo(_expectedAccount.Description));
             Assert.That(updatedAccount.PhoneNumbers.Count, Is.EqualTo(0));
         });
-    }
-
-    [Test]
-    public async Task SetSuspenedAsync_Should_Return_Error_If_Account_With_This_Id_Is_Not_Found()
-    {
-        // Act
-        var error = await _accountAccessor.SetSuspendedAsync(Guid.NewGuid()) as CallError;
-
-        // Assert
-        Assert.That(error, Is.Not.Null);
-        Assert.That(error.Code, Is.EqualTo(ErrorCodes.VOICEFLEX_0001));
     }
 
     [TearDown]
