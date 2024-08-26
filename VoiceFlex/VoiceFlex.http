@@ -1,6 +1,7 @@
 ﻿@VoiceFlex_HostAddress = https://localhost:7164
+@Account_Id = 36B5B29E-7984-4274-87BB-91FF2FC72C69
 
-GET {{VoiceFlex_HostAddress}}/api/phonenumbers
+GET {{VoiceFlex_HostAddress}}/api/accounts/{{Account_Id}}/phonenumbers
 
 ###
 
