@@ -34,7 +34,7 @@ public class AccountManagerTests
             .Setup(v => v.DescriptionMustBeValid(It.IsAny<string>()))
             .Returns(_mockAccountValidator.Object);
         _mockAccountAccessor
-            .Setup(accessor => accessor.CreateAsync(It.IsAny<AccountDto>()))
+            .Setup(a => a.CreateAsync(It.IsAny<AccountDto>()))
             .ReturnsAsync(_account);
 
         // Act
@@ -51,7 +51,7 @@ public class AccountManagerTests
     {
         // Arrange
         _mockAccountAccessor
-            .Setup(accessor => accessor.GetAsync(It.IsAny<Guid>()))
+            .Setup(a => a.GetAsync(It.IsAny<Guid>()))
             .ReturnsAsync(_accountDto);
         _mockAccountValidator
             .Setup(v => v.FoundInDatabase(It.IsAny<AccountDto>()))
@@ -73,10 +73,10 @@ public class AccountManagerTests
         // Arrange
         var accountUpdateDto = new AccountUpdateDto { Status = status };
         _mockAccountAccessor
-            .Setup(accessor => accessor.SetActiveAsync(It.IsAny<Guid>()))
+            .Setup(a => a.SetActiveAsync(It.IsAny<Guid>()))
             .ReturnsAsync(_account);
         _mockAccountAccessor
-            .Setup(accessor => accessor.SetSuspendedAsync(It.IsAny<Guid>()))
+            .Setup(a => a.SetSuspendedAsync(It.IsAny<Guid>()))
             .ReturnsAsync(_account);
         _mockAccountValidator
             .Setup(v => v.FoundInDatabase(It.IsAny<Account>()))
@@ -86,9 +86,9 @@ public class AccountManagerTests
         var actualAccount = await _accountManager.UpdateAccountAsync(_accountDto.Id, accountUpdateDto);
 
         // Assert
-        _mockAccountAccessor.Verify(accessor => accessor.SetActiveAsync(It.Is<Guid>(p => p.Equals(_accountDto.Id))),
+        _mockAccountAccessor.Verify(a => a.SetActiveAsync(It.Is<Guid>(p => p.Equals(_accountDto.Id))),
             status == AccountStatus.Active ? Times.Once : Times.Never);
-        _mockAccountAccessor.Verify(accessor => accessor.SetSuspendedAsync(It.Is<Guid>(p => p.Equals(_accountDto.Id))),
+        _mockAccountAccessor.Verify(a => a.SetSuspendedAsync(It.Is<Guid>(p => p.Equals(_accountDto.Id))),
             status == AccountStatus.Active ? Times.Never : Times.Once);
         _mockAccountValidator.Verify(v => v.FoundInDatabase(It.Is<Account>(p => p.Equals(_account))), Times.Once);
         Assert.That(actualAccount, Is.EqualTo(_account));

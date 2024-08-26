@@ -65,7 +65,7 @@ public class PhoneNumberValidatorTests : ValidatorTests
         var account = accountFound ? new AccountDto() : null;
 
         // Act
-        var error = _phoneNumberValidator.AccountMustBeInDatabase(account).ErrorFound as CallError;
+        var error = _phoneNumberValidator.AccountFoundInDatabase(account).ErrorFound as CallError;
 
         // Assert
         AssertValidationResult(error, isValid, ErrorCodes.VOICEFLEX_0004);

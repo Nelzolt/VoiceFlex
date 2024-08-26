@@ -41,15 +41,15 @@ public class PhoneNumberManager : IPhoneNumberManager
         var dbPhoneNumber = await _phoneNumberAccessor.GetAsync(id);
 
         return isAssignAttempt
-            ? await AssignPhoneNumber(dbPhoneNumber)
+            ? await AssignPhoneNumber(dbPhoneNumber, (Guid)phoneNumberUpdate.AccountId)
             : await UnassignPhoneNumber(dbPhoneNumber);
 
-        async Task <ICallResult> AssignPhoneNumber(PhoneNumber dbPhoneNumber)
+        async Task <ICallResult> AssignPhoneNumber(PhoneNumber dbPhoneNumber, Guid accountId)
         {
-            var dbAccount = await _accountAccessor.GetAsync((Guid)phoneNumberUpdate.AccountId);
+            var dbAccount = await _accountAccessor.GetAsync(accountId);
             return _phoneNumberValidator
                 .FoundInDatabase(dbPhoneNumber)
-                .AccountMustBeInDatabase(dbAccount)
+                .AccountFoundInDatabase(dbAccount)
                 .AccountMustBeActive(dbAccount?.Status)
                 .PhoneNumberMustBeUnassigned(dbPhoneNumber?.AccountId)
                 .ErrorFound
